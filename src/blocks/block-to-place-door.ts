@@ -4,7 +4,8 @@ import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import { NULL_VECTOR, Vector, facingMapping, subVectors } from '../components/vector';
 import { isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace, BlockToPlaceBottomSupportedBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
 import { BlockToPlaceNull } from './block-to-place-null';
 
 export class BlockToPlaceDoor
@@ -46,12 +47,12 @@ class BlockToPlaceDoorUpper extends BlockToPlaceNull implements BlockToPlace {
     y: number,
     z: number,
     paletteBlock: PaletteBlock,
-    private facing: Vector,
+    private readonly facing: Vector,
   ) {
     super(id, x, y, z, paletteBlock);
   }
 
-  reachabilityDirections(reachability: Reachability): number {
+  override reachabilityDirections(reachability: Reachability): number {
     return isTurtleReachable(reachability.at(...subVectors(this, this.facing)))
       ? vectorToSingleDir(subVectors(NULL_VECTOR, this.facing))
       : 0;

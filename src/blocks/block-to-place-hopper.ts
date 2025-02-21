@@ -5,7 +5,8 @@ import { Reachability } from '../components/reachability';
 import { DOWN, facingMapping, vectorsEqual } from '../components/vector';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
-import { BlockToPlace, BlockToPlaceBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
 import { BlockToPlaceFacingOther } from './block-to-place-facing';
 
 export function blockToPlaceHopperFactory(
@@ -70,7 +71,7 @@ export class BlockToPlaceHopperDown extends BlockToPlaceBase implements BlockToP
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       reachabilityDirections === (Dir.East | Dir.West) ||

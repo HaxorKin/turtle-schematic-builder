@@ -1,6 +1,7 @@
-import { assert } from 'console';
+import assert from 'assert';
 import { NBT } from 'prismarine-nbt';
-import { BlockToPlace, BlockToPlaceBase } from '../../blocks/block-to-place';
+import { BlockToPlace } from '../../blocks/bases/block-to-place';
+import { BlockToPlaceBase } from '../../blocks/bases/block-to-place-base';
 import { GameState, GameStateEnvironment } from '../../components/game-state';
 import { InventoryState } from '../../components/inventory';
 import { PaletteBlock, SchematicNbt } from '../../components/nbt.validator';
@@ -10,16 +11,12 @@ import { TurtleState } from '../../components/turtle-state';
 import { EAST, NORTH, NULL_VECTOR, SOUTH, Vector, WEST } from '../../components/vector';
 import { createBlocksToPlace } from '../../create-blocks-to-place';
 import { createBlockDependencyMap } from '../create-block-dependency-map';
+import { isBlock } from '../reachability-helpers';
 import { airNbt } from './mock-nbts';
 import { graphemes } from './text';
 
 class BlockToPlaceTestDummy extends BlockToPlaceBase implements BlockToPlace {
-  reachabilityDirections(
-    reachability: Reachability,
-    blocksToPlace?: Map<string, BlockToPlace>,
-  ): number | undefined {
-    return this._reachabilityDirections;
-  }
+  extraBlocks?: BlockToPlace[];
 
   constructor(
     id: number,
@@ -27,7 +24,7 @@ class BlockToPlaceTestDummy extends BlockToPlaceBase implements BlockToPlace {
     y: number,
     z: number,
     public dependencyDirections: number | undefined,
-    private _reachabilityDirections?: number,
+    private readonly _reachabilityDirections?: number,
   ) {
     super(id, x, y, z, {
       Name: {
@@ -36,7 +33,12 @@ class BlockToPlaceTestDummy extends BlockToPlaceBase implements BlockToPlace {
       },
     });
   }
-  extraBlocks?: BlockToPlace[] | undefined;
+
+  reachabilityDirections() // reachability: Reachability,
+  // blocksToPlace?: Map<string, BlockToPlace>,
+  : number | undefined {
+    return this._reachabilityDirections;
+  }
 }
 
 let id = 0;
@@ -95,8 +97,8 @@ export function placementTest({
   const width = parsedLayers[0]?.[0]?.length;
   const depth = parsedLayers[0]?.length;
 
-  assert(width > 0, 'Width must be greater than 0');
-  assert(depth > 0, 'Depth must be greater than 0');
+  assert(width, 'Width must be greater than 0');
+  assert(depth, 'Depth must be greater than 0');
 
   // Assert that all layers have the same width and depth
   for (const layer of parsedLayers) {
@@ -128,7 +130,7 @@ export function placementTest({
 
   const unplacedBlocks = new Map(
     allBlocksToPlace.entries().filter(
-      ([, [x, y, z]]) => reachability.at(x, y, z) !== ReachabilityState.Blocked, //TODO: Check how it works with water
+      ([, [x, y, z]]) => !isBlock(reachability.at(x, y, z)), //TODO: Check how it works with water
     ),
   );
   const gameState = new GameState(
@@ -155,9 +157,12 @@ function mockNbt({
   palette: Record<string, [PaletteBlock, ...unknown[]]>;
   turtleIsOver?: string;
 }): SchematicNbt {
-  const width = layers[0][0].length;
-  const depth = layers[0].length;
+  const width = layers[0]?.[0]?.length;
+  const depth = layers[0]?.length;
   const height = layers.length;
+
+  assert(width, 'Width must be greater than 0');
+  assert(depth, 'Depth must be greater than 0');
 
   const paletteValues = [airNbt, ...Object.values(palette).map(([block]) => block)];
   const paletteIndexes = new Map<string, number>(
@@ -250,10 +255,13 @@ function placementTestTurtle(
 ): [TurtleState, 'place' | 'placeUp' | 'placeDown'] {
   for (let y = 0; y < layers.length; y++) {
     const layer = layers[y];
+    assert(layer);
     for (let z = 0; z < layer.length; z++) {
       const row = layer[z];
+      assert(row);
       for (let x = 0; x < row.length; x++) {
         const char = row[x];
+        assert(char);
         const actionAndDirection = actionAndDirectionMapping[char];
         if (actionAndDirection) {
           const [action, direction] = actionAndDirection;
@@ -270,26 +278,29 @@ function placementTestBlockedMap(
   layers: string[][][],
   palette: Record<string, [unknown, 'placed' | 'unplaced']>,
 ): Int16Array {
-  const width = layers[0][0].length;
-  const depth = layers[0].length;
+  const width = layers[0]?.[0]?.length;
+  const depth = layers[0]?.length;
   const height = layers.length;
 
-  // const [targetX, targetY, targetZ] = targetPos;
-  // const targetIndex = targetX + targetY * width + targetZ * width * height;
+  assert(width, 'Width must be greater than 0');
+  assert(depth, 'Depth must be greater than 0');
 
   const blockedMap = new Int16Array(width * height * depth).fill(
     ReachabilityState.Unreachable,
   );
 
-  for (let y = 0; y < height; y++) {
+  for (let y = 0; y < layers.length; y++) {
     const layer = layers[y];
+    assert(layer);
     for (let z = 0; z < layer.length; z++) {
       const row = layer[z];
+      assert(row);
       for (let x = 0; x < row.length; x++) {
         const char = row[x];
+        assert(char);
         if (
           !'✖️🔼🔽◀️▶️⏫⏬⏩⏪⬆️⬇️➡️⬅️'.includes(char) &&
-          palette[char]?.[1] === 'placed'
+          palette[char satisfies string]?.[1] === 'placed'
         ) {
           const index = x + y * width + z * width * height;
           blockedMap[index] = ReachabilityState.Blocked;

@@ -2,14 +2,28 @@ import { PriorityQueue } from '@js-sdsl/priority-queue';
 import { AstarNode } from './astar-node';
 
 export class HeuristicOptimizer {
+  /** The best node found so far, for debugging purposes. */
+  best?: AstarNode;
+
   private readonly stepAfterNoImprovement: number;
   private readonly heuristicMultiplierStep: number;
   private heuristicMultiplier: number;
   private noImprovementCounter = 0;
   private blocksPlaced = 0;
 
-  /** The best node found so far, for debugging purposes. */
-  best?: AstarNode;
+  constructor({
+    stepAfterNoImprovement,
+    heuristicMultiplierStep,
+    initialHeuristicMultiplier,
+  }: Readonly<{
+    stepAfterNoImprovement: number;
+    heuristicMultiplierStep: number;
+    initialHeuristicMultiplier: number;
+  }>) {
+    this.stepAfterNoImprovement = stepAfterNoImprovement;
+    this.heuristicMultiplierStep = heuristicMultiplierStep;
+    this.heuristicMultiplier = initialHeuristicMultiplier;
+  }
 
   private static trimBuffers(
     openSetBuffer: AstarNode[],
@@ -38,20 +52,6 @@ export class HeuristicOptimizer {
     for (const node of openSetBuffer) {
       node.fCost = node.gCost + node.hCost * heuristicMultiplier;
     }
-  }
-
-  constructor({
-    stepAfterNoImprovement,
-    heuristicMultiplierStep,
-    initialHeuristicMultiplier,
-  }: Readonly<{
-    stepAfterNoImprovement: number;
-    heuristicMultiplierStep: number;
-    initialHeuristicMultiplier: number;
-  }>) {
-    this.stepAfterNoImprovement = stepAfterNoImprovement;
-    this.heuristicMultiplierStep = heuristicMultiplierStep;
-    this.heuristicMultiplier = initialHeuristicMultiplier;
   }
 
   fCost(gCost: number, hCost: number) {

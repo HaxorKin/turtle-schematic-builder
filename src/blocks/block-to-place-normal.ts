@@ -1,29 +1,30 @@
 import { Reachability } from '../components/reachability';
 import { classFactory } from '../helpers/class-factory';
 import { isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace, BlockToPlaceBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
 
 export class BlockToPlaceNormal extends BlockToPlaceBase implements BlockToPlace {
   get dependencyDirections() {
     return undefined;
   }
 
-  isReachable(reachability: Reachability) {
+  override isReachable(reachability: Reachability) {
     return isTurtleReachable(reachability.at(this[0], this[1], this[2]));
   }
 
-  isConditionSatisfied() {
+  override isConditionSatisfied() {
     return true;
   }
 
-  isPlaceable() {
+  override isPlaceable() {
     return true;
   }
 
   reachabilityDirections() {
     return undefined;
   }
-  reachabilityCount() {
+  override reachabilityCount() {
     return undefined;
   }
 }

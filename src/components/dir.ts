@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { DOWN, EAST, NORTH, SOUTH, UP, Vector, WEST } from './vector';
 
 export const enum Dir {
@@ -7,6 +8,7 @@ export const enum Dir {
   Down = 0b001000,
   South = 0b010000,
   North = 0b100000,
+  All = 0b111111,
 }
 
 export function vectorToSingleDir([x, y, z]: Vector): Dir {

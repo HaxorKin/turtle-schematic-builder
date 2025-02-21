@@ -2,7 +2,8 @@ import { Dir } from '../components/dir';
 import { Reachability } from '../components/reachability';
 import { classFactory } from '../helpers/class-factory';
 import { isTurtleReachable } from './../helpers/reachability-helpers';
-import { BlockToPlace, BlockToPlaceBottomSupportedBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
 
 // A bottom supported block can be placed if:
 // - There is space for the turtle on any side of the block other than below
@@ -38,7 +39,7 @@ export class BlockToPlaceBottomSupported
     return reachabilityDirections;
   }
 
-  isPlaceable(reachability: Reachability): boolean {
+  override isPlaceable(reachability: Reachability): boolean {
     return this.isConditionSatisfied(reachability);
   }
 }

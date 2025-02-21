@@ -6,7 +6,7 @@ export function getActionSequenceFromGoalNode(goalNode: AstarNode): Action[] {
   const sequence: Action[] = [];
   let currentNode: AstarNode | undefined = goalNode;
 
-  while (currentNode?.parent) {
+  while (currentNode) {
     if (currentNode.action) sequence.push(currentNode.action);
     currentNode = currentNode.parent;
   }

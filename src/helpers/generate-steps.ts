@@ -9,7 +9,7 @@ function simplifyItemName(itemName: string): string {
 }
 
 function processAction(
-  action: Action,
+  action: Omit<Action, 'resupply'>,
   currentGameState: GameState,
   hopperCoords: Set<string>,
 ): [newGameState: GameState, luaLine: string] {
@@ -84,7 +84,7 @@ function processAction(
       throw new Error(`Unknown action: ${action}`);
   }
 
-  [currentGameState] = currentGameState.executeAction(action);
+  [currentGameState] = currentGameState.executeAction(action as Action);
   const isOnHoppper = hopperCoords.has(
     String(addVectors(currentGameState.turtle.position, DOWN)),
   );
@@ -106,6 +106,7 @@ function generateSuck(inventory: InventoryState) {
     sums[simplifiedKey] = (sums[simplifiedKey] ?? 0) + count;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
   return `resupply(textutils.unserialiseJSON([[${JSON.stringify(sums, null, 2)}]]))`;
 }
 

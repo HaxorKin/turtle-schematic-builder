@@ -11,7 +11,8 @@ import {
 } from '../components/vector';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
-import { BlockToPlace, BlockToPlaceFacingHorizontalBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceFacingHorizontalBase } from './bases/block-to-place-facing-horizontal-base';
 import { invertedStairlikeBlocks } from './block.constants';
 
 // A top half block can be placed if:
@@ -28,10 +29,6 @@ export class BlockToPlaceStairlikeTop
   extends BlockToPlaceFacingHorizontalBase
   implements BlockToPlace
 {
-  get dependencyDirections() {
-    return Dir.Up | Dir.Down;
-  }
-
   constructor(
     id: number,
     x: number,
@@ -41,6 +38,10 @@ export class BlockToPlaceStairlikeTop
     readonly facing: Vector,
   ) {
     super(id, x, y, z, paletteBlock);
+  }
+
+  get dependencyDirections() {
+    return Dir.Up | Dir.Down;
   }
 
   reachabilityDirections(
@@ -68,7 +69,7 @@ export class BlockToPlaceStairlikeTop
     return reachabilityDirections;
   }
 
-  isDeadlockable(): boolean {
+  override isDeadlockable(): boolean {
     return true;
   }
 }
@@ -137,7 +138,7 @@ export class BlockToPlaceStairlikeBottom
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       reachabilityDirections === (Dir.East | Dir.West) ||
@@ -165,12 +166,11 @@ export function blockToPlaceStairlikeFactory(
     ? subVectors(NULL_VECTOR, facingVector)
     : facingVector;
 
-  switch (half) {
-    case 'top':
-      return new BlockToPlaceStairlikeTop(id, x, y, z, paletteBlock, facingVector);
-    case 'bottom':
-      return new BlockToPlaceStairlikeBottom(id, x, y, z, paletteBlock, facingVector);
-    default:
-      throw new Error(`Invalid half property: ${half}`);
+  if (half === 'top') {
+    return new BlockToPlaceStairlikeTop(id, x, y, z, paletteBlock, facingVector);
   }
+  if (half === 'bottom') {
+    return new BlockToPlaceStairlikeBottom(id, x, y, z, paletteBlock, facingVector);
+  }
+  throw new Error(`Invalid half property: ${half}`);
 }

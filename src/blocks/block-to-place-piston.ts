@@ -18,7 +18,7 @@ import {
   Vector,
   vectorsEqual,
 } from '../components/vector';
-import { BlockToPlace } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
 import {
   BlockToPlaceFacingDown,
   BlockToPlaceFacingOther,

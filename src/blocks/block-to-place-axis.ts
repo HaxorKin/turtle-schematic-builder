@@ -14,7 +14,8 @@ import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
-import { BlockToPlace, BlockToPlaceBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
 
 export class BlockToPlaceAxisY extends BlockToPlaceBase implements BlockToPlace {
   get dependencyDirections() {
@@ -59,7 +60,7 @@ export class BlockToPlaceAxisY extends BlockToPlaceBase implements BlockToPlace 
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       reachabilityDirections === (Dir.East | Dir.West) ||

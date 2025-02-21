@@ -6,7 +6,8 @@ import { facingMapping, NULL_VECTOR, subVectors, Vector } from '../components/ve
 import { classFactory } from '../helpers/class-factory';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
-import { BlockToPlace, BlockToPlaceWallAttachedBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceWallAttachedBase } from './bases/block-to-place-wall-attached-base';
 
 // A wall sign can be placed if:
 // There is a block behind the target block
@@ -71,7 +72,7 @@ export class BlockToPlaceWallSign
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       reachabilityDirections === (Dir.Up | Dir.Down)

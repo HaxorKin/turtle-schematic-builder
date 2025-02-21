@@ -14,10 +14,10 @@ export class AstarNode {
     gameState: GameState,
     parent: AstarNode | undefined = undefined,
     action: Action | undefined = undefined,
-    gCost: number = 0,
-    hCost: number = 0,
-    fCost: number = 0,
-    totalBlocksPlaced: number = 0,
+    gCost = 0,
+    hCost = 0,
+    fCost = 0,
+    totalBlocksPlaced = 0,
   ) {
     this.parent = parent;
     this.gameState = gameState;

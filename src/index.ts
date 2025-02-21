@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { PriorityQueue } from '@js-sdsl/priority-queue';
 import assert from 'assert';
 import { readFile, writeFile } from 'fs/promises';
 import { parse } from 'prismarine-nbt';
-import { BlockToPlace } from './blocks/block-to-place';
+import { BlockToPlace } from './blocks/bases/block-to-place';
 import { BlockToPlaceLiquid } from './blocks/block-to-place-liquid';
 import { BlockToPlaceParams } from './blocks/block-to-place-params';
 import { Action } from './components/action';
@@ -10,7 +12,7 @@ import { AstarNode } from './components/astar-node';
 import { GameState, GameStateEnvironment } from './components/game-state';
 import { HeuristicOptimizer } from './components/heuristic-optimizer';
 import { InventoryState } from './components/inventory';
-import { Pathfinding } from './components/pathfinding';
+import { findPath } from './components/pathfinding';
 import { Reachability } from './components/reachability';
 import { PaddingOptions, Schematic } from './components/schematic';
 import { TurtleState } from './components/turtle-state';
@@ -68,7 +70,6 @@ function calculateHeuristic(gameState: GameState) {
       gameState.inventoryCredit.canAddItem(block.itemName) &&
       !cannotBePlacedBeforeLiquid(block, blocksToPlace)
     ) {
-      (gameState as any).targetBlock = block;
       minDistance = distance;
       return true;
     }
@@ -110,8 +111,8 @@ async function aStarSearch(rootGameState: GameState) {
 
   openSet.push(startNode);
 
-  while (openSet.length > 0) {
-    const currentNode = openSet.pop()!;
+  let currentNode: AstarNode | undefined;
+  while ((currentNode = openSet.pop())) {
     openSet = await heuristicOptimizer.next(
       currentNode,
       openSetBuffer,
@@ -224,7 +225,7 @@ const initialInventory = new InventoryState();
 
 let currentGameState = new GameState(
   gameStateEnv,
-  chunks[0],
+  chunks[0]!,
   initialTurtle,
   initialReachability,
   initialInventory,
@@ -234,12 +235,12 @@ const fullActionSequence: Action[] = [];
 const startTime = Date.now();
 for (let i = 0; i < chunks.length; i++) {
   console.log(
-    `Processing chunk ${i + 1}/${chunks.length} with ${chunks[i].size} blocks`,
+    `Processing chunk ${i + 1}/${chunks.length} with ${chunks[i]!.size} blocks`,
   );
 
   const chunkGameState = new GameState(
     gameStateEnv,
-    chunks[i],
+    chunks[i]!,
     currentGameState.turtle,
     currentGameState.reachability,
     currentGameState.inventoryCredit,
@@ -619,12 +620,12 @@ print("Build completed")
 `;
 
 const hopperCoords = new Set<string>();
-let [luaScript, gameState] = generateStepsWithResupply(
+const [luaScript, gameState] = generateStepsWithResupply(
   fullActionSequence,
   initialGameState,
   hopperCoords,
 );
-const pathToOrigin = Pathfinding.findPath(
+const pathToOrigin = findPath(
   gameState.turtle.position,
   gameState.turtle.direction,
   initialTurtle.position,
@@ -641,7 +642,7 @@ const totalMoves = [...fullActionSequence, ...pathToOrigin].reduce(
 );
 console.log(`Fuel cost: ${totalMoves}`);
 
-luaScript = luaScript.replace('--REFUEL', `refuel(${totalMoves})`);
+const luaScriptWithRefuel = luaScript.replace('--REFUEL', `refuel(${totalMoves})`);
 
 const fileName = `build_${new Date()
   .toISOString()
@@ -650,7 +651,7 @@ const fileName = `build_${new Date()
   .replace('T', '_')}.lua`;
 await writeFile(
   fileName,
-  [luaInit, luaScript, luaScriptToOrigin, luaCleanup].join('\n'),
+  [luaInit, luaScriptWithRefuel, luaScriptToOrigin, luaCleanup].join('\n'),
 );
 
 console.log(`Lua script generated: ${fileName}`);

@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { BlockToPlace } from './blocks/block-to-place';
+import { BlockToPlace } from './blocks/bases/block-to-place';
 import { blockToPlaceAxisFactory } from './blocks/block-to-place-axis';
 import { blockToPlaceBottomSupportedFactory } from './blocks/block-to-place-bottom-supported';
 import { blockToPlaceDoorFactory } from './blocks/block-to-place-door';
@@ -17,6 +17,7 @@ import { blockToPlaceWallAttachedFactory } from './blocks/block-to-place-wall-at
 import { blockToPlaceWallSignFactory } from './blocks/block-to-place-wall-sign';
 import { blockToPlaceWallTorchFactory } from './blocks/block-to-place-wall-torch';
 import { copperTypes, woodTypes } from './blocks/block.constants';
+import { Dir } from './components/dir';
 import { PaletteBlock } from './components/nbt.validator';
 import { Reachability } from './components/reachability';
 import { Schematic } from './components/schematic';
@@ -137,24 +138,36 @@ function createBlockToPlace(
 }
 
 function isWaterlogged(block: PaletteBlock): boolean {
-  return block.Properties?.value?.waterlogged?.value === 'true';
+  return block.Properties?.value.waterlogged?.value === 'true';
 }
 
 const waterlogWaterPaletteBlock: PaletteBlock = {
   Name: { type: 'string', value: 'minecraft:water' },
 };
 
-function processBlock(
-  schematic: Schematic,
-  reachability: Reachability,
-  x: number,
-  y: number,
-  z: number,
-  blockIdCounter: number,
-  allBlocksToPlace: Map<string, BlockToPlace>,
-  blockParameters: Map<string, BlockToPlaceParams>,
-  gateMap: Uint8Array,
-): boolean {
+interface ProcessBlockParams {
+  schematic: Schematic;
+  reachability: Reachability;
+  x: number;
+  y: number;
+  z: number;
+  blockIdCounter: number;
+  allBlocksToPlace: Map<string, BlockToPlace>;
+  blockParameters: Map<string, BlockToPlaceParams>;
+  gateMap: Uint8Array;
+}
+
+function processBlock({
+  schematic,
+  reachability,
+  x,
+  y,
+  z,
+  blockIdCounter,
+  allBlocksToPlace,
+  blockParameters,
+  gateMap,
+}: ProcessBlockParams): boolean {
   const paletteBlock = schematic.at(x, y, z);
   const blockToPlace = createBlockToPlace(
     blockIdCounter,
@@ -215,7 +228,7 @@ export function createBlocksToPlace(
   const [schematicWidth, schematicHeight, schematicDepth] = schematic.size;
   const gateMap = new Uint8Array(
     schematicWidth * schematicHeight * schematicDepth,
-  ).fill(0b111111);
+  ).fill(Dir.All);
 
   reachability ??= new Reachability(schematic.size, [0, 0, 0], gateMap.slice());
 
@@ -227,7 +240,7 @@ export function createBlocksToPlace(
     for (let y = 0; y < schematicHeight; y++) {
       for (let z = 0; z < schematicDepth; z++) {
         if (
-          processBlock(
+          processBlock({
             schematic,
             reachability,
             x,
@@ -237,7 +250,7 @@ export function createBlocksToPlace(
             allBlocksToPlace,
             blockParameters,
             gateMap,
-          )
+          })
         ) {
           blockIdCounter++;
         }

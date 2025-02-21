@@ -12,7 +12,8 @@ import {
 import { classFactory } from '../helpers/class-factory';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
-import { BlockToPlace, BlockToPlaceFacingHorizontalBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceFacingHorizontalBase } from './bases/block-to-place-facing-horizontal-base';
 import { nonInvertedFacingHorizontalBlocks } from './block.constants';
 
 // A facing horizontal block can be placed:
@@ -87,7 +88,7 @@ export class BlockToPlaceFacingHorizontal
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       reachabilityDirections === (Dir.East | Dir.West) ||

@@ -12,7 +12,8 @@ import {
 } from '../components/vector';
 import { classFactory } from '../helpers/class-factory';
 import { isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace, BlockToPlaceBottomSupportedBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
 import { nonInvertedRepeaterlikeBlocks } from './block.constants';
 
 // A repeaterlike block can be placed:
@@ -44,7 +45,7 @@ export class BlockToPlaceRepeaterlike
     this.dependencyDirections = Dir.Up | mirrorDir(vectorToSingleDir(this.facing));
   }
 
-  isPlaceable(reachability: Reachability, turtle: TurtleState): boolean {
+  override isPlaceable(reachability: Reachability, turtle: TurtleState): boolean {
     return (
       this.isConditionSatisfied(reachability) &&
       vectorsEqual(turtle.direction, this.facing)

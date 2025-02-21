@@ -1,4 +1,6 @@
-import { BlockToPlace } from '../blocks/block-to-place';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import assert from 'assert';
+import { BlockToPlace } from '../blocks/bases/block-to-place';
 import { splitIntoChunks } from './split-into-chunks';
 import { createBlock } from './testing/testing';
 
@@ -28,14 +30,17 @@ describe('splitIntoChunks', () => {
 
     // Then I should get two chunks
     expect(result.length).toBe(2);
+    const [chunk1, chunk2] = result.map((chunk) => [...chunk.keys()]);
+    assert(chunk1);
+    assert(chunk2);
 
     // And the first chunk should contain blocks with y=0,1
-    expect(result[0].keys()).toContain('0,0,0');
-    expect(result[0].keys()).toContain('0,1,0');
-    expect(result[0].keys()).toContain('1,1,0');
+    expect(chunk1).toContain('0,0,0');
+    expect(chunk1).toContain('0,1,0');
+    expect(chunk1).toContain('1,1,0');
 
     // And the second chunk should contain block4 alone
-    expect(result[1].keys()).toContain('0,2,0');
+    expect(chunk2).toContain('0,2,0');
   });
 
   it('should not split blocks into chunks that are on the same layer', () => {
@@ -76,7 +81,7 @@ describe('splitIntoChunks', () => {
 
     // Then I should get exactly one chunk with all blocks
     expect(result.length).toBe(1);
-    expect(result[0].size).toBe(64);
+    expect(result[0]!.size).toBe(64);
   });
 
   it('should handle blocks when they have negative y coordinates', () => {
@@ -93,14 +98,17 @@ describe('splitIntoChunks', () => {
 
     // Then I should get two chunks
     expect(result.length).toBe(2);
+    const [chunk1, chunk2] = result.map((chunk) => [...chunk.keys()]);
+    assert(chunk1);
+    assert(chunk2);
 
     // And the first chunk should contain blocks with y=-2,-1
-    expect(result[0].keys()).toContain('0,-2,0');
-    expect(result[0].keys()).toContain('0,-1,0');
+    expect(chunk1).toContain('0,-2,0');
+    expect(chunk1).toContain('0,-1,0');
 
     // And the second chunk should contain blocks with y=0,1
-    expect(result[1].keys()).toContain('0,0,0');
-    expect(result[1].keys()).toContain('0,1,0');
+    expect(chunk2).toContain('0,0,0');
+    expect(chunk2).toContain('0,1,0');
   });
 
   it("should handle blocks when they skip y coordinates, layers don't get counted", () => {
@@ -115,9 +123,10 @@ describe('splitIntoChunks', () => {
 
     // Then I should get two chunks
     expect(result.length).toBe(1);
+    const chunk = [...result[0]!.keys()];
 
     // And the chunk should contain both blocks
-    expect(result[0].keys()).toContain('0,0,0');
-    expect(result[0].keys()).toContain('0,3,0');
+    expect(chunk).toContain('0,0,0');
+    expect(chunk).toContain('0,3,0');
   });
 });

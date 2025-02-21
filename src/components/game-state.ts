@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import assert from 'assert';
-import { BlockToPlace } from '../blocks/block-to-place';
+import { BlockToPlace } from '../blocks/bases/block-to-place';
 import { BlockToPlaceLiquid, BlockToPlaceWater } from '../blocks/block-to-place-liquid';
 import { BlockToPlacePistonhead } from '../blocks/block-to-place-piston';
 import { blocksToPlaceItemNames } from '../helpers/blocks-to-place-itemnames';
@@ -7,7 +8,7 @@ import { isBlock, isTurtleReachable } from '../helpers/reachability-helpers';
 import { Action, actionCosts } from './action';
 import { dirCount } from './dir';
 import { InventoryState } from './inventory';
-import { Pathfinding } from './pathfinding';
+import { findPath } from './pathfinding';
 import { Reachability, ReachabilityState } from './reachability';
 import { TurtleState } from './turtle-state';
 import { addVectors, DOWN, subVectors, UP, Vector } from './vector';
@@ -26,6 +27,113 @@ export class GameState {
     public readonly reachability: Reachability,
     public readonly inventoryCredit: InventoryState,
   ) {}
+
+  getPossibleActions(): (Action | [Action, GameState])[] {
+    const { reachability, turtle, inventoryCredit } = this;
+    if (inventoryCredit.addableItemRatio === 0) {
+      return [];
+    }
+
+    const actions: (Action | [Action, GameState])[] = ['turnLeft', 'turnRight'];
+    const { position, direction } = turtle;
+
+    const forwardPosition = addVectors(position, direction);
+    const backwardPosition = subVectors(position, direction);
+    const upPosition = addVectors(position, UP);
+    const downPosition = addVectors(position, DOWN);
+
+    if (isTurtleReachable(reachability.at(...forwardPosition))) {
+      actions.push('forward');
+    }
+    const gameStateAfterPlace = this.tryToPlaceBlock(forwardPosition);
+    if (gameStateAfterPlace) {
+      actions.push(['place', gameStateAfterPlace]);
+    }
+    const gameStateAfterPlaceUp = this.tryToPlaceBlock(upPosition);
+    if (gameStateAfterPlaceUp) {
+      actions.push(['placeUp', gameStateAfterPlaceUp]);
+    }
+    const gameStateAfterPlaceDown = this.tryToPlaceBlock(downPosition);
+    if (gameStateAfterPlaceDown) {
+      actions.push(['placeDown', gameStateAfterPlaceDown]);
+    }
+    if (isTurtleReachable(reachability.at(...backwardPosition))) {
+      actions.push('back');
+    }
+    if (isTurtleReachable(reachability.at(...upPosition))) {
+      actions.push('up');
+    }
+    if (isTurtleReachable(reachability.at(...downPosition))) {
+      actions.push('down');
+    }
+
+    return actions;
+  }
+
+  getResupplyActions() {
+    const actions = findPath(
+      this.turtle.position,
+      this.turtle.direction,
+      this.env.supplyPointPosition,
+      this.env.supplyPointDirection,
+      this.reachability.size,
+      this.reachability.blockedMap,
+    );
+    assert(actions, 'No path to supply point found');
+    return actions;
+  }
+
+  executeAction(
+    action: Action | [Action, GameState],
+  ): [gameState: GameState, cost: number] {
+    if (typeof action === 'object') {
+      const [actionType, gameState] = action;
+      return [gameState, actionCosts[actionType]];
+    }
+
+    let newTurtle: TurtleState;
+    switch (action) {
+      case 'forward':
+        newTurtle = this.turtle.forward();
+        break;
+      case 'back':
+        newTurtle = this.turtle.back();
+        break;
+      case 'up':
+        newTurtle = this.turtle.up();
+        break;
+      case 'down':
+        newTurtle = this.turtle.down();
+        break;
+      case 'turnLeft':
+        newTurtle = this.turtle.turnLeft();
+        break;
+      case 'turnRight':
+        newTurtle = this.turtle.turnRight();
+        break;
+      case 'place':
+        return this.placeAction(this.turtle.direction);
+      case 'placeUp':
+        return this.placeAction(UP);
+      case 'placeDown':
+        return this.placeAction(DOWN);
+      case 'resupply':
+        return this.resupplyAction();
+      default:
+        throw new Error(`${action} is not supported here`);
+    }
+
+    return [
+      new GameState(
+        this.env,
+        this.blocksToPlace,
+        newTurtle,
+        this.reachability,
+        this.inventoryCredit,
+      ),
+      actionCosts[action],
+    ];
+  }
 
   private getDeadlockableDependants(
     reachability: Reachability,
@@ -49,10 +157,10 @@ export class GameState {
         continue;
       }
 
-      const reachabilityDirections = gateMap[index];
+      const reachabilityDirections = gateMap[index]!;
       if (reachabilityDirections === 0) return false;
       const reachabilityCount = dirCount(reachabilityDirections);
-      const oldReachabilityCount = dirCount(originalGateMap[index]);
+      const oldReachabilityCount = dirCount(originalGateMap[index]!);
       if (
         reachabilityCount < oldReachabilityCount &&
         block.isDeadlockable(reachabilityCount)
@@ -168,48 +276,6 @@ export class GameState {
     return newGameState;
   }
 
-  getPossibleActions(): (Action | [Action, GameState])[] {
-    const { reachability, turtle, inventoryCredit } = this;
-    if (inventoryCredit.addableItemRatio === 0) {
-      return [];
-    }
-
-    const actions: (Action | [Action, GameState])[] = ['turnLeft', 'turnRight'];
-    const { position, direction } = turtle;
-
-    const forwardPosition = addVectors(position, direction);
-    const backwardPosition = subVectors(position, direction);
-    const upPosition = addVectors(position, UP);
-    const downPosition = addVectors(position, DOWN);
-
-    if (isTurtleReachable(reachability.at(...forwardPosition))) {
-      actions.push('forward');
-    }
-    const gameStateAfterPlace = this.tryToPlaceBlock(forwardPosition);
-    if (gameStateAfterPlace) {
-      actions.push(['place', gameStateAfterPlace]);
-    }
-    const gameStateAfterPlaceUp = this.tryToPlaceBlock(upPosition);
-    if (gameStateAfterPlaceUp) {
-      actions.push(['placeUp', gameStateAfterPlaceUp]);
-    }
-    const gameStateAfterPlaceDown = this.tryToPlaceBlock(downPosition);
-    if (gameStateAfterPlaceDown) {
-      actions.push(['placeDown', gameStateAfterPlaceDown]);
-    }
-    if (isTurtleReachable(reachability.at(...backwardPosition))) {
-      actions.push('back');
-    }
-    if (isTurtleReachable(reachability.at(...upPosition))) {
-      actions.push('up');
-    }
-    if (isTurtleReachable(reachability.at(...downPosition))) {
-      actions.push('down');
-    }
-
-    return actions;
-  }
-
   private place(blockToPlace: BlockToPlace): GameState {
     const blockToPlaceKey = String(blockToPlace);
 
@@ -288,71 +354,6 @@ export class GameState {
         this.inventoryCredit.clear(),
       ),
       costSum * this.inventoryCredit.addableItemRatio,
-    ];
-  }
-
-  getResupplyActions() {
-    const actions = Pathfinding.findPath(
-      this.turtle.position,
-      this.turtle.direction,
-      this.env.supplyPointPosition,
-      this.env.supplyPointDirection,
-      this.reachability.size,
-      this.reachability.blockedMap,
-    );
-    assert(actions, 'No path to supply point found');
-    return actions;
-  }
-
-  executeAction(
-    action: Action | [Action, GameState],
-  ): [gameState: GameState, cost: number] {
-    if (typeof action === 'object') {
-      const [actionType, gameState] = action;
-      return [gameState, actionCosts[actionType]];
-    }
-
-    let newTurtle: TurtleState;
-    switch (action) {
-      case 'forward':
-        newTurtle = this.turtle.forward();
-        break;
-      case 'back':
-        newTurtle = this.turtle.back();
-        break;
-      case 'up':
-        newTurtle = this.turtle.up();
-        break;
-      case 'down':
-        newTurtle = this.turtle.down();
-        break;
-      case 'turnLeft':
-        newTurtle = this.turtle.turnLeft();
-        break;
-      case 'turnRight':
-        newTurtle = this.turtle.turnRight();
-        break;
-      case 'place':
-        return this.placeAction(this.turtle.direction);
-      case 'placeUp':
-        return this.placeAction(UP);
-      case 'placeDown':
-        return this.placeAction(DOWN);
-      case 'resupply':
-        return this.resupplyAction();
-      default:
-        throw new Error(`${action} is not supported here`);
-    }
-
-    return [
-      new GameState(
-        this.env,
-        this.blocksToPlace,
-        newTurtle,
-        this.reachability,
-        this.inventoryCredit,
-      ),
-      actionCosts[action],
     ];
   }
 }

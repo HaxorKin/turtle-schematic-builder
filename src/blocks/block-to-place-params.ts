@@ -1,12 +1,12 @@
-export type BlockToPlaceLiquidParams = {
+export interface BlockToPlaceLiquidParams {
   type: 'liquid';
   maxMissingSupportBlocks: number;
-};
+}
 
 //TODO: Remove once there is more than one type of BlockToPlaceParams
-export type BlockToPlaceTestParams = {
+export interface BlockToPlaceTestParams {
   type: 'test';
   test: string;
-};
+}
 
 export type BlockToPlaceParams = BlockToPlaceLiquidParams | BlockToPlaceTestParams;

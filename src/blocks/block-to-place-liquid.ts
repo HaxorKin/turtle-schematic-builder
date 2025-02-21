@@ -12,20 +12,15 @@ import {
   UP,
 } from '../components/vector';
 import { isBlock, isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace, BlockToPlaceBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
 import { BlockToPlaceParams } from './block-to-place-params';
 import { mightFailHitscan } from './block.constants';
 
 export class BlockToPlaceLiquid extends BlockToPlaceBase implements BlockToPlace {
-  // private static readonly reachabilityOffsets = [UP, DOWN, NORTH, EAST, SOUTH, WEST];
-
-  // private readonly reachabilityPositions = BlockToPlaceLiquid.reachabilityOffsets.map(
-  //   offset => addVectors(this, offset)
-  // );
-
-  get dependencyDirections() {
-    return undefined;
-  }
+  protected static readonly supportBlockRange = 7;
+  protected static readonly skyCheckRange = 7;
+  protected static readonly skyCheckMaxSteps = 14;
 
   constructor(
     id: number,
@@ -36,6 +31,10 @@ export class BlockToPlaceLiquid extends BlockToPlaceBase implements BlockToPlace
     readonly maxMissingSupportBlocks = 1,
   ) {
     super(id, x, y, z, paletteBlock);
+  }
+
+  get dependencyDirections() {
+    return undefined;
   }
 
   private static tryToReachSky(
@@ -152,37 +151,16 @@ export class BlockToPlaceLiquid extends BlockToPlaceBase implements BlockToPlace
     return false;
   }
 
-  isReachable(reachability: Reachability) {
-    // return this.reachabilityPositions.some(position =>
-    //   isTurtleReachable(reachability.at(...position))
-    // );
-    //
-    // Check if the block has access to the sky
-    // const originDistance = reachability.originDistance;
-    // const [width, height, depth] = reachability.size;
-    // const [x, y, z] = this;
-    // const end = width * height * depth;
-    // for (let i = x + (y + 1) * width + z * width * height; i < end; i += width) {
-    //   if (!isTurtleReachable(originDistance[i])) {
-    //     return false;
-    //   }
-    // }
-    // return true;
-    //
-    // const [x, y, z] = this;
-    // for (let i = y + 1; i < reachability.size[1]; i++) {
-    //   if (!isTurtleReachable(reachability.at(x, i, z))) {
-    //     return false;
-    //   }
-    // }
-    // return true;
-
+  override isReachable(reachability: Reachability) {
     if (this.maxMissingSupportBlocks > 0) {
       return isTurtleReachable(reachability.at(...addVectors(this, UP)));
     }
 
-    let [x, y, z] = this;
-    const targetY = Math.min(reachability.size[1] - 1, y + 7);
+    const [x, y, z] = this;
+    const targetY = Math.min(
+      reachability.size[1] - 1,
+      y + BlockToPlaceLiquid.skyCheckRange,
+    );
 
     return BlockToPlaceLiquid.tryToReachSky(
       reachability,
@@ -191,50 +169,19 @@ export class BlockToPlaceLiquid extends BlockToPlaceBase implements BlockToPlace
       z,
       targetY,
       y + 1,
-      14,
+      BlockToPlaceLiquid.skyCheckMaxSteps,
     );
   }
 
-  isConditionSatisfied(
+  override isConditionSatisfied(
     reachability: Reachability,
     blocksToPlace: Map<string, BlockToPlace>,
   ) {
-    // let hasSingleOpenSide = false;
-    // for (const position of this.reachabilityPositions) {
-    //   if (!isTurtleReachable(reachability.at(...position))) continue;
-    //   if (hasSingleOpenSide) {
-    //     hasSingleOpenSide = false;
-    //     break;
-    //   }
-    //   hasSingleOpenSide = true;
-    // }
-    // const y = this[1];
-    // return (
-    //   hasSingleOpenSide ||
-    //   !blocksToPlace
-    //     .values()
-    //     .some(block => block[1] < y && !(block instanceof BlockToPlaceLiquid))
-    // );
-    //
-    // const [x, y, z] = this;
-    // return (
-    //   hasSingleOpenSide ||
-    //   !blocksToPlace
-    //     .values()
-    //     .some(
-    //       block =>
-    //         (block[1] === y || block[1] === y - 1) &&
-    //         Math.abs(block[0] - x) <= 1 &&
-    //         Math.abs(block[2] - z) <= 1 &&
-    //         !(block instanceof BlockToPlaceLiquid)
-    //     )
-    // );
-
     let missingSupportBlocks = 0;
     for (const otherBlock of blocksToPlace.values()) {
       if (
         otherBlock[1] <= this[1] &&
-        manhattanDistance(otherBlock, this) <= 7 &&
+        manhattanDistance(otherBlock, this) <= BlockToPlaceLiquid.supportBlockRange &&
         !(otherBlock instanceof BlockToPlaceLiquid)
       ) {
         if (++missingSupportBlocks > this.maxMissingSupportBlocks) {
@@ -245,7 +192,7 @@ export class BlockToPlaceLiquid extends BlockToPlaceBase implements BlockToPlace
     return true;
   }
 
-  isPlaceable(
+  override isPlaceable(
     reachability: Reachability,
     _turtle: TurtleState,
     blocksToPlace: Map<string, BlockToPlace>,
@@ -273,11 +220,10 @@ export class BlockToPlaceWater extends BlockToPlaceLiquid implements BlockToPlac
     super(id, x, y, z, paletteBlock, maxMissingSupportBlocks);
 
     const waterloggedBlock = this.schematic.at(x, y, z);
-    this.mightFailHitscan =
-      !waterloggedBlock || mightFailHitscan(waterloggedBlock.Name.value);
+    this.mightFailHitscan = mightFailHitscan(waterloggedBlock.Name.value);
   }
 
-  isPlaceable(
+  override isPlaceable(
     reachability: Reachability,
     turtle: TurtleState,
     blocksToPlace: Map<string, BlockToPlace>,
@@ -315,7 +261,7 @@ export class BlockToPlaceWater extends BlockToPlaceLiquid implements BlockToPlac
 }
 
 export class BlockToPlaceLava extends BlockToPlaceLiquid implements BlockToPlace {
-  isConditionSatisfied(
+  override isConditionSatisfied(
     _reachability: Reachability,
     blocksToPlace: Map<string, BlockToPlace>,
   ) {
@@ -323,7 +269,7 @@ export class BlockToPlaceLava extends BlockToPlaceLiquid implements BlockToPlace
     for (const otherBlock of blocksToPlace.values()) {
       if (
         otherBlock[1] <= this[1] &&
-        manhattanDistance(otherBlock, this) <= 7 &&
+        manhattanDistance(otherBlock, this) <= BlockToPlaceLiquid.supportBlockRange &&
         !(otherBlock instanceof BlockToPlaceLava)
       ) {
         if (++missingSupportBlocks > this.maxMissingSupportBlocks) {

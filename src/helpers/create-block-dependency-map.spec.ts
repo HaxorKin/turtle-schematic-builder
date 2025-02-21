@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { BlockToPlace } from '../blocks/block-to-place';
+import { BlockToPlace } from '../blocks/bases/block-to-place';
 import { Dir } from '../components/dir';
 import { createBlockDependencyMap } from './create-block-dependency-map';
 import { createBlock } from './testing/testing';
@@ -16,26 +16,26 @@ describe('createBlockDependencyMap', () => {
   });
 
   it('should create correct dependencies for blocks with dependency directions', () => {
-    const blocks = new Map<string, BlockToPlace>([
+    const blocks = [
       createBlock(0, 0, 0),
       createBlock(0, 1, 0, { dependencyDirections: Dir.Down }),
-    ]);
-    const [block1, block2] = blocks.values();
+    ] as const;
+    const [[, block1], [, block2]] = blocks;
 
-    const result = createBlockDependencyMap(blocks);
+    const result = createBlockDependencyMap(new Map(blocks));
     expect(result.size).toBe(1);
     expect(result.get(block1)).toEqual([block2]);
   });
 
   it('should handle multiple dependencies for a single block', () => {
-    const blocks = new Map<string, BlockToPlace>([
+    const blocks = [
       createBlock(0, 0, 0),
       createBlock(1, 0, 0, { dependencyDirections: Dir.West }),
       createBlock(0, 1, 0, { dependencyDirections: Dir.Down }),
-    ]);
-    const [block1, block2, block3] = blocks.values();
+    ] as const;
+    const [[, block1], [, block2], [, block3]] = blocks;
 
-    const result = createBlockDependencyMap(blocks);
+    const result = createBlockDependencyMap(new Map(blocks));
     expect(result.size).toBe(1);
     const block1Result = result.get(block1);
     assert(block1Result);

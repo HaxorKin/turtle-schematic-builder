@@ -23,7 +23,8 @@ import {
 } from '../components/vector';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
-import { BlockToPlace, BlockToPlaceBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
 import { nonInvertedFacingBlocks } from './block.constants';
 
 export class BlockToPlaceFacingDown extends BlockToPlaceBase implements BlockToPlace {
@@ -71,7 +72,7 @@ export class BlockToPlaceFacingDown extends BlockToPlaceBase implements BlockToP
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       reachabilityDirections === (Dir.East | Dir.West) ||

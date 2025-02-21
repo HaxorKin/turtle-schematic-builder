@@ -1,39 +1,40 @@
 import { Reachability } from '../components/reachability';
 import { TurtleState } from '../components/turtle-state';
-import { BlockToPlace, BlockToPlaceBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
 
 export class BlockToPlaceNull extends BlockToPlaceBase implements BlockToPlace {
   get dependencyDirections() {
     return undefined;
   }
 
-  isReachable(reachability: Reachability): boolean;
-  isReachable() {
+  override isReachable(reachability: Reachability): boolean;
+  override isReachable() {
     return true;
   }
 
-  isConditionSatisfied(
+  override isConditionSatisfied(
     reachability: Reachability,
     blocksToPlace: Map<string, BlockToPlace>,
   ): boolean;
-  isConditionSatisfied() {
+  override isConditionSatisfied() {
     return false;
   }
 
-  isPlaceable(
+  override isPlaceable(
     reachability: Reachability,
     turtle: TurtleState,
     blocksToPlace: Map<string, BlockToPlace>,
   ): boolean;
-  isPlaceable() {
+  override isPlaceable() {
     return false;
   }
 
-  reachabilityCount(
+  override reachabilityCount(
     reachability: Reachability,
     blocksToPlace: Map<string, BlockToPlace> | undefined,
   ): number | undefined;
-  reachabilityCount() {
+  override reachabilityCount() {
     return undefined;
   }
 

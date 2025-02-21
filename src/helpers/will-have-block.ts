@@ -1,4 +1,4 @@
-import { BlockToPlace } from '../blocks/block-to-place';
+import { BlockToPlace } from '../blocks/bases/block-to-place';
 import { BlockToPlaceLiquid } from '../blocks/block-to-place-liquid';
 
 export function willHaveBlock(

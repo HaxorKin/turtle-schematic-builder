@@ -1,5 +1,7 @@
 import { getItemStackLimit } from '../blocks/block.constants';
 
+const turtleSlotLimit = 16;
+
 export class InventoryState {
   readonly addableItemRatio: number = 1;
 
@@ -11,7 +13,7 @@ export class InventoryState {
     possibleItemsCount: number,
   );
   constructor(
-    private readonly slotLimit: number = 16,
+    private readonly slotLimit = turtleSlotLimit,
     private readonly slots: [itemName: string, capacity: number][] = [],
     possibleItems?: ArrayIterator<string>,
     possibleItemsCount?: number,
@@ -45,7 +47,9 @@ export class InventoryState {
     );
     if (slotIndex !== -1) {
       const newSlots = this.slots.slice();
-      newSlots[slotIndex] = [name, newSlots[slotIndex][1] - 1];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const count = newSlots[slotIndex]![1];
+      newSlots[slotIndex] = [name, count - 1];
       return new InventoryState(
         this.slotLimit,
         newSlots,

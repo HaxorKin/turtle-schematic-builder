@@ -1,21 +1,22 @@
 import { ArkErrors } from 'arktype';
+import assert from 'assert';
 import { NBT } from 'prismarine-nbt';
 import { PaletteBlock, schematicNbt } from './nbt.validator';
 import { Vector } from './vector';
 
-export type PaddingOptions = {
+export interface PaddingOptions {
   north?: boolean;
   east?: boolean;
   south?: boolean;
   west?: boolean;
   up?: boolean;
   down?: boolean;
-};
+}
 
 export class Schematic {
+  public readonly size: Vector;
   private readonly blocks: number[][][];
   private readonly palette: PaletteBlock[];
-  public readonly size: Vector;
 
   constructor(
     nbt: NBT,
@@ -23,12 +24,13 @@ export class Schematic {
   ) {
     const validatedNbt = schematicNbt(nbt);
     if (validatedNbt instanceof ArkErrors) {
-      throw validatedNbt;
+      validatedNbt.throw();
+      throw new Error('Unreachable');
     }
 
     this.palette = validatedNbt.value.palette.value.value;
     const originalSize = validatedNbt.value.size.value.value;
-    let size: Vector = [...originalSize] as Vector;
+    const size = [...originalSize] as Vector;
 
     // Adjust size based on paddingOptions using ++
     if (paddingOptions.north) size[2]++;
@@ -57,7 +59,7 @@ export class Schematic {
 
     // Populate existing blocks
     for (const block of validatedNbt.value.blocks.value.value) {
-      let [x, y, z] = block.pos.value.value;
+      let [x, y, z] = block.pos.value.value as Vector;
 
       // Adjust positions based on paddingOptions using ++
       if (paddingOptions.north) z++;
@@ -65,14 +67,17 @@ export class Schematic {
       if (paddingOptions.down) y++;
 
       if (x >= 0 && x < size[0] && y >= 0 && y < size[1] && z >= 0 && z < size[2]) {
-        this.blocks[x][y][z] = block.state.value;
+        this.set(x, y, z, block.state.value);
       }
     }
   }
 
   at(x: number, y: number, z: number): PaletteBlock {
-    const paletteIndex = this.blocks[x][y][z];
-    return this.palette[paletteIndex];
+    const paletteIndex = this.blocks[x]?.[y]?.[z];
+    assert(paletteIndex !== undefined);
+    const paletteBlock = this.palette[paletteIndex];
+    assert(paletteBlock);
+    return paletteBlock;
   }
 
   padVector(vector: Vector): Vector {
@@ -82,5 +87,11 @@ export class Schematic {
     if (paddingOptions.down) y++;
     if (paddingOptions.north) z++;
     return [x, y, z];
+  }
+
+  private set(x: number, y: number, z: number, paletteIndex: number): void {
+    const zRow = this.blocks[x]?.[y];
+    assert(zRow);
+    zRow[z] = paletteIndex;
   }
 }

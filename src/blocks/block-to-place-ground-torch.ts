@@ -2,7 +2,8 @@ import { Dir, dirCount } from '../components/dir';
 import { Reachability } from '../components/reachability';
 import { classFactory } from '../helpers/class-factory';
 import { isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace, BlockToPlaceBottomSupportedBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
 
 // A bottom supported torch can be placed if:
 // There is a block below the target block
@@ -41,7 +42,7 @@ export class BlockToPlaceGroundTorch
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       reachabilityDirections === (Dir.East | Dir.West) ||

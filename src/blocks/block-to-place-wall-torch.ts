@@ -19,7 +19,8 @@ import {
 } from '../components/vector';
 import { classFactory } from '../helpers/class-factory';
 import { isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace, BlockToPlaceWallAttachedBase } from './block-to-place';
+import { BlockToPlace } from './bases/block-to-place';
+import { BlockToPlaceWallAttachedBase } from './bases/block-to-place-wall-attached-base';
 
 // A wall torch can be placed if:
 // There is a block behind the target block
@@ -101,7 +102,7 @@ export class BlockToPlaceWallTorch
     return reachabilityDirections;
   }
 
-  isDeadlockable(reachabilityDirections: number): boolean {
+  override isDeadlockable(reachabilityDirections: number): boolean {
     return (
       dirCount(reachabilityDirections) <= 1 ||
       (reachabilityDirections & (Dir.Up | Dir.Down)) === 0 ||

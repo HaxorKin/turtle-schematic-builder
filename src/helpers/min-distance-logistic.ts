@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 const minDistanceLogisticEpsilon = 1e-3;
 const minDistanceLogisticNegK = -minDistanceLogisticEpsilon;
 

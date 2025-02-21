@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 export const woodTypes = [
   'oak',
   'spruce',
