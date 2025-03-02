@@ -64,6 +64,10 @@ const paletteItem = type({
         type: `'string'`,
         value: `'true' | 'false'`,
       },
+      'in_wall?': {
+        type: `'string'`,
+        value: `'true' | 'false'`,
+      },
     },
   },
 });
