@@ -87,6 +87,17 @@ export const fenceGateNbt = ({
     open: 'false',
   } as const);
 
+export const observerNbt = ({
+  facing,
+}: {
+  facing: 'north' | 'east' | 'south' | 'west' | 'up' | 'down';
+}): PaletteBlock =>
+  createBlockNbt({
+    name: 'minecraft:observer',
+    facing,
+    powered: 'false',
+  } as const);
+
 export const pressurePlateNbt = createBlockNbt({
   name: 'minecraft:stone_pressure_plate',
   powered: 'false',

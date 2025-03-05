@@ -60,13 +60,7 @@ const wallSignBlocks = woodTypes.map((type) => `minecraft:${type}_wall_sign`);
 
 const wallAttachedBlocks = ['minecraft:ladder'];
 
-const facingBlocks = [
-  // 'minecraft:piston',
-  // 'minecraft:sticky_piston',
-  'minecraft:observer',
-  'minecraft:dispenser',
-  'minecraft:dropper',
-];
+const facingBlocks = ['minecraft:observer', 'minecraft:dispenser', 'minecraft:dropper'];
 const pistonBlocks = ['minecraft:piston', 'minecraft:sticky_piston'];
 
 const facingHorizontalBlocks = [
