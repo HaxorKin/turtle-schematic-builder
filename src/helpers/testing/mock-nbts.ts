@@ -98,6 +98,17 @@ export const observerNbt = ({
     powered: 'false',
   } as const);
 
+export const hopperNbt = ({
+  facing,
+}: {
+  facing: 'north' | 'east' | 'south' | 'west' | 'down';
+}): PaletteBlock =>
+  createBlockNbt({
+    name: 'minecraft:hopper',
+    facing,
+    enabled: 'true',
+  } as const);
+
 export const pressurePlateNbt = createBlockNbt({
   name: 'minecraft:stone_pressure_plate',
   powered: 'false',
