@@ -102,3 +102,7 @@ export const pressurePlateNbt = createBlockNbt({
   name: 'minecraft:stone_pressure_plate',
   powered: 'false',
 } as const) satisfies PaletteBlock;
+
+export const torchNbt = createBlockNbt({
+  name: 'minecraft:torch',
+} as const) satisfies PaletteBlock;
