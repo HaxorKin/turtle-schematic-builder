@@ -1,8 +1,21 @@
 import eslint from '@eslint/js';
 import jsdoc from 'eslint-plugin-jsdoc';
+import { readdir } from 'fs/promises';
 import tseslint from 'typescript-eslint';
 
+const rootDirs = (await readdir(import.meta.dirname, { withFileTypes: true }))
+  .filter((x) => x.isDirectory())
+  .map((x) => x.name);
+
 export default tseslint.config(
+  {
+    // Global ignores, won't run any processing on these files
+    ignores: [
+      '*.*', // Ignore every root-level file
+      // Ignore every directory besides src
+      ...rootDirs.filter((x) => x !== 'src'),
+    ],
+  },
   {
     languageOptions: {
       parserOptions: {
@@ -14,18 +27,12 @@ export default tseslint.config(
     eslint.configs.recommended,
     ...tseslint.configs.strictTypeChecked,
     ...tseslint.configs.stylisticTypeChecked,
+    jsdoc.configs['flat/recommended-typescript'],
   ].map((config) => ({
     ...config,
-    ignores: [
-      '*', // Ignore root-level files
-    ],
   })),
-  jsdoc.configs['flat/recommended-typescript'],
   {
-    ignores: [
-      '*', // Ignore root-level files
-      '**/*.spec.ts',
-    ],
+    ignores: ['**/*.spec.ts'],
 
     rules: {
       eqeqeq: ['error', 'always', { null: 'ignore' }],

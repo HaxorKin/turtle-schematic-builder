@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    // Reset includes so only imports are included
+    "src/**/*.d.ts", // Ensure global types are included
+    "src/index.ts" // Only imported files are included
+  ],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}
