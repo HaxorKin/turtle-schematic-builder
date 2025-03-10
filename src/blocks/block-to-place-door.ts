@@ -52,10 +52,8 @@ class BlockToPlaceDoorUpper extends BlockToPlaceNull implements BlockToPlace {
     super(id, x, y, z, paletteBlock);
   }
 
-  override reachabilityDirections(reachability: Reachability): number {
-    return isTurtleReachable(reachability.at(...subVectors(this, this.facing)))
-      ? vectorToSingleDir(subVectors(NULL_VECTOR, this.facing))
-      : 0;
+  override reachabilityDirections(): number {
+    return vectorToSingleDir(subVectors(NULL_VECTOR, this.facing));
   }
 }
 

@@ -5,6 +5,7 @@ const palette: PlacementTestPalette = {
   '🟨': [cobblestoneNbt, 'placed'],
   '🟧': [cobblestoneNbt, 'unplaced'],
   '🟫': [doorNbt({ facing: 'east' }), 'unplaced'],
+  '🟤': [doorNbt({ facing: 'east', half: 'upper' }), 'unplaced'],
 };
 
 const placement = createPlacementTest(palette);
@@ -18,7 +19,7 @@ describe('BlockToPlaceDoor', () => {
 
       ▶️🟫
 
-      ✖️✖️
+      ✖️🟤
     `,
   });
 
@@ -30,7 +31,7 @@ describe('BlockToPlaceDoor', () => {
 
       ▶️🟫
 
-      ✖️✖️
+      ✖️🟤
     `,
     fail: true,
   });
@@ -45,7 +46,7 @@ describe('BlockToPlaceDoor', () => {
       ✖️🟫◀️
       ✖️✖️✖️
 
-      ✖️✖️✖️
+      ✖️🟤✖️
       ✖️✖️✖️
     `,
     fail: true,
@@ -67,7 +68,7 @@ describe('BlockToPlaceDoor', () => {
       ✖️✖️✖️✖️✖️
 
       ✖️✖️🟨✖️✖️
-      ✖️🟨✖️✖️✖️
+      ✖️🟨✖️🟤✖️
       ✖️✖️🟨✖️✖️
       ✖️✖️✖️✖️✖️
     `,
@@ -84,9 +85,21 @@ describe('BlockToPlaceDoor', () => {
       ▶️🟧🟫
       ✖️✖️✖️
 
-      ✖️✖️✖️
+      ✖️✖️🟤
       ✖️✖️✖️
     `,
     fail: true,
+  });
+
+  placement({
+    it: 'should allow upper half to be blocked off if the bottom half is still reachable',
+    // Given the only free sides of the upper half of the door are behind and under
+    layers: `
+      ✖️✖️🟨
+
+      ✖️✖️🟫
+
+      ▶️🟧🟤
+    `,
   });
 });

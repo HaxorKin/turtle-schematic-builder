@@ -56,13 +56,15 @@ export const airNbt = createBlockNbt({
 
 export const doorNbt = ({
   facing,
+  half = 'lower',
 }: {
   facing: 'north' | 'east' | 'south' | 'west';
+  half?: 'upper' | 'lower';
 }): PaletteBlock =>
   createBlockNbt({
     name: 'minecraft:oak_door',
     facing,
-    half: 'lower',
+    half,
     hinge: 'left',
     open: 'false',
     powered: 'false',
