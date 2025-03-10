@@ -179,10 +179,10 @@ function processBlock({
     for (const block of [blockToPlace, ...(blockToPlace.extraBlocks ?? [])]) {
       allBlocksToPlace.set(String(block), block);
 
-      const gates = blockToPlace.reachabilityDirections(reachability, allBlocksToPlace);
+      const gates = block.reachabilityDirections(reachability, allBlocksToPlace);
       if (gates !== undefined) {
         if (gates === 0) {
-          throw new Error(`Block ${blockToPlace} cannot be reached`);
+          throw new Error(`Block ${block} cannot be reached`);
         }
         const [x, y, z] = block;
         gateMap[x + y * width + z * width * height] = gates;
