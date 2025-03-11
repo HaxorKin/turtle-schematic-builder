@@ -84,4 +84,29 @@ describe('BlockToPlaceFacingHorizontal', () => {
       ✖️⬆️
     `,
   });
+
+  placement({
+    it: 'should not allow placing a block behind if it makes the block unplaceable',
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️👈🟧
+      ✖️✖️🔼
+    `,
+    fail: true,
+  });
+
+  // Positive test case for the test above
+  placement({
+    it: 'should allow placing a block behind if it does not make the block unplaceable',
+    // Given it can still be placed from the bottom
+    layers: `
+      ✖️✖️✖️
+      ✖️✖️✖️
+
+      ✖️👈🟧
+      ✖️✖️🔼
+    `,
+  });
 });

@@ -13,7 +13,7 @@ const placement = createPlacementTest(palette);
 
 describe('BlockToPlaceAxis X', () => {
   placement({
-    it: 'should be able to be placed against the turtle',
+    it: 'should be able to be placed against the turtle from west',
     // Given I have air under and behind the block I want to place
     layers: `
       ✖️✖️✖️
@@ -23,7 +23,17 @@ describe('BlockToPlaceAxis X', () => {
   });
 
   placement({
-    it: 'should be placeable if there is a block behind the target block',
+    it: 'should be able to be placed against the turtle from east',
+    // Given I have air under and behind the block I want to place
+    layers: `
+      ✖️✖️✖️
+
+      ✖️♒◀️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from west if there is a block behind the target block',
     // Given I have a block under and behind the block I want to place
     layers: `
       ✖️🟨✖️
@@ -33,12 +43,37 @@ describe('BlockToPlaceAxis X', () => {
   });
 
   placement({
-    it: 'should not be placeable if there is no block behind the target block, but there is a block below',
+    it: 'should not be placeable from west if there is no block behind the target block, but there is a block below',
     // Given I have a block under and no block behind the block I want to place
     layers: `
       ✖️🟨✖️
 
       ▶️♒✖️
+    `,
+    fail: true,
+  });
+
+  placement({
+    it: 'should be placeable from east if there is a block behind the target block',
+    // Given I have a block under and behind the block I want to place
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      🟨♒◀️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should not be placeable from east if there is no block behind the target block, but there is a block below',
+    // Given I have a block under and no block behind the block I want to place
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️♒◀️
+      ✖️✖️✖️
     `,
     fail: true,
   });
@@ -96,7 +131,7 @@ describe('BlockToPlaceAxis X', () => {
 
 describe('BlockToPlaceAxis Z', () => {
   placement({
-    it: 'should be able to be placed against the turtle',
+    it: 'should be able to be placed against the turtle from north',
     // Given I have air under and behind the block I want to place
     layers: `
       ✖️
@@ -110,7 +145,21 @@ describe('BlockToPlaceAxis Z', () => {
   });
 
   placement({
-    it: 'should be placeable if there is a block behind the target block',
+    it: 'should be able to be placed against the turtle from south',
+    // Given I have air under and behind the block I want to place
+    layers: `
+      ✖️
+      ✖️
+      ✖️
+
+      ✖️
+      ♊
+      🔼
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from north if there is a block behind the target block',
     // Given I have a block under and behind the block I want to place
     layers: `
       ✖️
@@ -124,7 +173,7 @@ describe('BlockToPlaceAxis Z', () => {
   });
 
   placement({
-    it: 'should not be placeable if there is no block behind the target block, but there is a block below',
+    it: 'should not be placeable from north if there is no block behind the target block, but there is a block below',
     // Given I have a block under and no block behind the block I want to place
     layers: `
       ✖️
@@ -134,6 +183,35 @@ describe('BlockToPlaceAxis Z', () => {
       🔽
       ♊
       ✖️
+    `,
+    fail: true,
+  });
+
+  placement({
+    it: 'should be placeable from south if there is a block behind the target block',
+    // Given I have a block under and behind the block I want to place
+    layers: `
+      ✖️✖️
+      🟨✖️
+      ✖️✖️
+
+      🟨✖️
+      ♊✖️
+      🔼✖️
+    `,
+  });
+
+  placement({
+    it: 'should not be placeable from south if there is no block behind the target block, but there is a block below',
+    // Given I have a block under and no block behind the block I want to place
+    layers: `
+      ✖️✖️
+      🟨✖️
+      ✖️✖️
+
+      ✖️✖️
+      ♊✖️
+      🔼✖️
     `,
     fail: true,
   });
@@ -220,7 +298,7 @@ describe('BlockToPlaceAxis Y', () => {
     layers: `
       ✖️✳️
 
-      ✳️⬆️
+      ✖️⬆️
     `,
   });
 
@@ -236,11 +314,54 @@ describe('BlockToPlaceAxis Y', () => {
   });
 
   placement({
-    it: 'should be placeable from the side if there is a block below the target block and no block behind',
+    it: 'should be placeable from west if there is a block below the target block and no block behind',
     layers: `
+      ✖️✖️✖️
       ✖️🟨✖️
+      ✖️✖️✖️
 
+      ✖️✖️✖️
       ▶️✳️✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from south if there is a block below the target block and no block behind',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️✳️✖️
+      ✖️🔼✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from east if there is a block below the target block and no block behind',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️✳️◀️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from north if there is a block below the target block and no block behind',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🔽✖️
+      ✖️✳️✖️
+      ✖️✖️✖️
     `,
   });
 

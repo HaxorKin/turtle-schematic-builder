@@ -34,9 +34,7 @@ class BlockToPlaceTestDummy extends BlockToPlaceBase implements BlockToPlace {
     });
   }
 
-  reachabilityDirections() // reachability: Reachability,
-  // blocksToPlace?: Map<string, BlockToPlace>,
-  : number | undefined {
+  reachabilityDirections(): number | undefined {
     return this._reachabilityDirections;
   }
 }
@@ -110,9 +108,6 @@ export function placementTest({
 
   const nbt = mockNbt({ layers: parsedLayers, palette, turtleIsOver });
   const [turtle, action] = placementTestTurtle(parsedLayers);
-  // const targetDirection =
-  //   action === 'place' ? turtle.direction : action === 'placeUp' ? UP : DOWN;
-  // const targetPos = addVectors(turtle.position, targetDirection);
 
   const blockedMap = placementTestBlockedMap(parsedLayers, palette);
 
