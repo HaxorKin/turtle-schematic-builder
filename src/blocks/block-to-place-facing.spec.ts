@@ -16,12 +16,58 @@ const placement = createPlacementTest(palette);
 
 describe('BlockToPlaceFacing', () => {
   placement({
-    it: 'should be placeable against the turtle',
+    it: 'should be placeable against the turtle from west',
     // Given there is no block behind or below the target block
     layers: `
       ✖️✖️✖️
+      ✖️✖️✖️
+      ✖️✖️✖️
 
+      ✖️✖️✖️
       ▶️👈✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the turtle from south',
+    // Given there is no block behind or below the target block
+    layers: `
+      ✖️✖️✖️
+      ✖️✖️✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️👇✖️
+      ✖️🔼✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the turtle from east',
+    // Given there is no block behind or below the target block
+    layers: `
+      ✖️✖️✖️
+      ✖️✖️✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️👉◀️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the turtle from north',
+    // Given there is no block behind or below the target block
+    layers: `
+      ✖️✖️✖️
+      ✖️✖️✖️
+      ✖️✖️✖️
+
+      ✖️🔽✖️
+      ✖️👆✖️
+      ✖️✖️✖️
     `,
   });
 
@@ -58,12 +104,71 @@ describe('BlockToPlaceFacing', () => {
   });
 
   placement({
-    it: 'should be placeable against the block below the target block',
-    // Given there is a block below the target block
+    it: 'should be placeable against the block below the target block from west',
     layers: `
+      ✖️✖️✖️
       ✖️🟨✖️
+      ✖️✖️✖️
 
+      ✖️✖️✖️
       ▶️🤚✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from south',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🔽✖️
+      ✖️🤚✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from east',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️🤚◀️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from north',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🔽✖️
+      ✖️🤚✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from above',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+    
+      ✖️✖️✖️
+      ✖️🤚✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️⬆️✖️
+      ✖️✖️✖️
     `,
   });
 
@@ -110,5 +215,48 @@ describe('BlockToPlaceFacing', () => {
 
       ✖️👉👉◀️
     `,
+  });
+
+  placement({
+    it: 'should not allow placing a block behind if it makes the block unplaceable',
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🤚🟧
+      ✖️✖️🔼
+
+      ✖️🟨✖️
+      ✖️✖️✖️
+    `,
+    fail: true,
+  });
+
+  // Positive test case for the test above
+  placement({
+    it: 'should allow placing a block behind if it does not make the block unplaceable',
+    // Given it can still be placed from the bottom
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🤚🟧
+      ✖️✖️🔼
+
+      ✖️✖️✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should not allow placing a block above if it makes the down facing block unplaceable',
+    layers: `
+      ✖️✖️
+
+      ✖️🤚
+
+      ▶️🟧
+    `,
+    fail: true,
   });
 });

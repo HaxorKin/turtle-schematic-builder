@@ -103,4 +103,31 @@ describe('BlockToPlaceGroundTorch', () => {
     `,
     fail: true,
   });
+
+  placement({
+    it: 'should not allow placing a block on the side that would make it unplaceable',
+    // Given I am at a position where placing a block would result in a deadlock (forcing a wall torch)
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️☀️🟧
+      ✖️✖️🔼
+    `,
+    fail: true,
+  });
+
+  // Positive test case for the test above
+  placement({
+    it: 'should allow placing a block on the side that does not make it unplaceable',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️☀️🟧
+      ✖️✖️🔼
+    `,
+  });
 });

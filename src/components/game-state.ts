@@ -16,6 +16,11 @@ import { addVectors, DOWN, subVectors, UP, Vector } from './vector';
 export interface GameStateEnvironment {
   readonly supplyPointPosition: Vector;
   readonly supplyPointDirection: Vector;
+
+  /**
+   * A map of blocks, where the key is a block that can affect the reachability
+   * of other blocks, and the value is an array of blocks that are affected.
+   */
   readonly blockDependencyMap: Map<BlockToPlace, BlockToPlace[]>;
 }
 

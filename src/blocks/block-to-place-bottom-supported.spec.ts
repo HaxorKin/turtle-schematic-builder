@@ -11,12 +11,71 @@ const placement = createPlacementTest(palette);
 
 describe('BlockToPlaceBottomSupported', () => {
   placement({
-    it: 'should be able to be placed',
-    // Given I have a block under the bottom-supported block I want to place
+    it: 'should be placeable from the west',
     layers: `
-      ✖️🟨
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
 
-      ▶️💠
+      ✖️✖️✖️
+      ▶️💠✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from the south',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️💠✖️
+      ✖️🔼✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from the east',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️💠◀️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from the north',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🔽✖️
+      ✖️💠✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from the top',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️💠✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️⬆️✖️
+      ✖️✖️✖️
     `,
   });
 
@@ -29,6 +88,17 @@ describe('BlockToPlaceBottomSupported', () => {
       ▶️💠
     `,
     fail: true,
+  });
+
+  // Positive test case for the above negative test case
+  placement({
+    it: 'should be placeable with unknown blocks on the sides',
+    // Given I have a block under the bottom-supported block I want to place
+    layers: `
+      ✖️🟨
+
+      ▶️💠
+    `,
   });
 
   placement({
