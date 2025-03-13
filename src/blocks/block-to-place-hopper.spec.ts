@@ -57,12 +57,71 @@ describe('BlockToPlaceHopper', () => {
   });
 
   placement({
-    it: 'should be placeable against the block below the target block',
-    // Given there is a block below the target block
+    it: 'should be placeable against the block below the target block from west',
     layers: `
+      ✖️✖️✖️
       ✖️🟨✖️
+      ✖️✖️✖️
 
+      ✖️✖️✖️
       ▶️🤚✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from south',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🔽✖️
+      ✖️🤚✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from east',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️🤚◀️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from north',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🔽✖️
+      ✖️🤚✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable against the block below the target block from above',
+    layers: `
+      ✖️✖️✖️
+      ✖️🟨✖️
+      ✖️✖️✖️
+    
+      ✖️✖️✖️
+      ✖️🤚✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️⬆️✖️
+      ✖️✖️✖️
     `,
   });
 
@@ -108,6 +167,48 @@ describe('BlockToPlaceHopper', () => {
       ✖️✖️✖️✖️
 
       ✖️👉👉◀️
+    `,
+  });
+
+  placement({
+    it: 'should not allow placing a block behind if it makes the block unplaceable',
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🤚🟧
+      ✖️✖️🔼
+
+      ✖️🟨✖️
+      ✖️✖️✖️
+    `,
+    fail: true,
+  });
+
+  // Positive test case for the test above
+  placement({
+    it: 'should allow placing a block behind if it does not make the block unplaceable',
+    // Given it can still be placed from the bottom
+    layers: `
+      ✖️🟨✖️
+      ✖️✖️✖️
+
+      ✖️🤚🟧
+      ✖️✖️🔼
+
+      ✖️✖️✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
+    it: 'should allow placing a block above a down facing hopper because there is no up facing hopper',
+    layers: `
+      ✖️✖️
+
+      ✖️🤚
+
+      ▶️🟧
     `,
   });
 });
