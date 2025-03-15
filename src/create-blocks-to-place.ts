@@ -254,7 +254,7 @@ export function createBlocksToPlace(
 
   if (blockParameters.size > 0) {
     throw new Error(
-      `Block parameters not used: ${[...blockParameters.keys()].join(', ')}`,
+      `Block parameters not used:\n${[...blockParameters.keys()].join('\n')}`,
     );
   }
 
