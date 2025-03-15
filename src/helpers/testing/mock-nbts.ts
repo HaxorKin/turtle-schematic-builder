@@ -89,6 +89,20 @@ export const fenceGateNbt = ({
     open: 'false',
   } as const);
 
+export const repeaterNbt = ({
+  facing,
+  delay = 1,
+}: {
+  facing: 'north' | 'east' | 'south' | 'west';
+  delay?: number;
+}): PaletteBlock =>
+  createBlockNbt({
+    name: 'minecraft:repeater',
+    facing,
+    delay: String(delay),
+    powered: 'false',
+  } as const);
+
 export const observerNbt = ({
   facing,
 }: {
