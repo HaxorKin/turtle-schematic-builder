@@ -133,3 +133,13 @@ export const pressurePlateNbt = createBlockNbt({
 export const torchNbt = createBlockNbt({
   name: 'minecraft:torch',
 } as const) satisfies PaletteBlock;
+
+export const ladderNbt = ({
+  facing,
+}: {
+  facing: 'north' | 'east' | 'south' | 'west';
+}): PaletteBlock =>
+  createBlockNbt({
+    name: 'minecraft:ladder',
+    facing,
+  } as const);
