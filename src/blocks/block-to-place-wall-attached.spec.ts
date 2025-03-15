@@ -88,6 +88,34 @@ describe('BlockToPlaceWallAttached', () => {
   });
 
   placement({
+    it: 'should be placeable from below even if not facing the block',
+    // Given the only wall it can attach to is the correct one
+    layers: `
+      ✖️✖️✖️
+      ✖️⏩✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️👇🟧
+      ✖️🟨✖️
+    `,
+  });
+
+  placement({
+    it: 'should be placeable from above even if not facing the block',
+    // Given the only wall it can attach to is the correct one
+    layers: `
+      ✖️✖️✖️
+      ✖️👇🟧
+      ✖️🟨✖️
+
+      ✖️✖️✖️
+      ✖️➡️✖️
+      ✖️✖️✖️
+    `,
+  });
+
+  placement({
     it: 'should not be placeable forwards if there is no block in front',
     layers: `
       ▶️👉🟧
