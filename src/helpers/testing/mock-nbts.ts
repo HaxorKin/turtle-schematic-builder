@@ -134,6 +134,16 @@ export const torchNbt = createBlockNbt({
   name: 'minecraft:torch',
 } as const) satisfies PaletteBlock;
 
+export const wallTorchNbt = ({
+  facing,
+}: {
+  facing: 'north' | 'east' | 'south' | 'west';
+}): PaletteBlock =>
+  createBlockNbt({
+    name: 'minecraft:wall_torch',
+    facing,
+  } as const);
+
 export const ladderNbt = ({
   facing,
 }: {
