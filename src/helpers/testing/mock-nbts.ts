@@ -143,3 +143,14 @@ export const ladderNbt = ({
     name: 'minecraft:ladder',
     facing,
   } as const);
+
+export const wallSignNbt = ({
+  facing,
+}: {
+  facing: 'north' | 'east' | 'south' | 'west';
+}): PaletteBlock =>
+  createBlockNbt({
+    name: 'minecraft:oak_wall_sign',
+    facing,
+    waterlogged: 'false',
+  } as const);

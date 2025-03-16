@@ -102,4 +102,16 @@ describe('BlockToPlaceDoor', () => {
       ▶️🟧🟤
     `,
   });
+
+  placement({
+    it: 'cannot be placed by the upper half of the door',
+    layers: `
+    ✖️🟨
+
+    ✖️🟫
+
+    ▶️🟤
+  `,
+    fail: true,
+  });
 });
