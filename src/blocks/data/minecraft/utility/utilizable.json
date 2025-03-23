@@ -1,0 +1,216 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{color}_banner",
+      "type": "groundSign",
+      "item": {
+        "stackSize": 16
+      }
+    },
+    {
+      "name": "minecraft:{color}_wall_banner",
+      "type": "wallSign",
+      "item": {
+        "name": ["minecraft:(.+)_wall_banner", "minecraft:$1_banner"],
+        "stackSize": 16
+      }
+    },
+    {
+      "name": "minecraft:beehive",
+      "type": "facingHorizontal"
+    },
+    {
+      "name": "minecraft:{color}_bed",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:bell",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:cake",
+      "type": "bottomSupported",
+      "item": {
+        "stackSize": 1
+      }
+    },
+    {
+      "name": "minecraft:candle_cake",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:cake",
+        "stackSize": 1
+      },
+      "$comment": "TODO: candle"
+    },
+    {
+      "name": "minecraft:{color}_candle_cake",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:cake",
+        "stackSize": 1
+      }
+    },
+    {
+      "name": "minecraft:{'soul_',''}campfire",
+      "type": "facingHorizontal",
+      "$comment": "TODO: lit false"
+    },
+    {
+      "name": "minecraft:{'lava_','powder_snow_','water_',''}cauldron",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:cauldron"
+      },
+      "$comment": "TODO: filled"
+    },
+    {
+      "name": "minecraft:chiseled_bookshelf",
+      "type": "facingHorizontal"
+    },
+    {
+      "name": "minecraft:{'composter','fletching_table'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:conduit",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:decorated_pot",
+      "type": "facingHorizontal"
+    },
+    {
+      "name": "minecraft:{'end_gateway','end_portal'}",
+      "type": "ignored"
+    },
+    {
+      "name": "minecraft:end_portal_frame",
+      "type": "facingHorizontal"
+    },
+    {
+      "name": "minecraft:farmland",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:dirt"
+      },
+      "$comment": "TODO: till?"
+    },
+    {
+      "name": "minecraft:flower_pot",
+      "type": "normal",
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:potted_{'dandelion','poppy','blue_orchid','allium','azure_bluet','oxeye_daisy','cornflower','lily_of_the_valley','wither_rose','torchflower','red_mushroom','brown_mushroom','fern','dead_bush','cactus','bamboo','azalea_bush','flowering_azalea_bush','mangrove_propagule','open_eyeblossom','closed_eyeblossom'}",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:flower_pot"
+      },
+      "mightFailHitscan": true,
+      "$comment": "TODO: plant"
+    },
+    {
+      "name": "minecraft:potted_{'red','orange','white','pink'}_tulip",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:flower_pot"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:potted_{wood}_sapling",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:flower_pot"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:potted_{'crimson','warped'}_{'fungus','roots'}",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:flower_pot"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:frosted_ice",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'skeleton','wither_skeleton'}_skull",
+      "type": "groundSign",
+      "$comment": "TODO: does not actually need bottom support"
+    },
+    {
+      "name": "minecraft:{'zombie','creeper','piglin','dragon'}_head",
+      "type": "groundSign"
+    },
+    {
+      "name": "minecraft:{'skeleton','wither_skeleton'}_wall_skull",
+      "type": "wallSign",
+      "item": {
+        "name": ["minecraft:(.+)_wall_skull", "minecraft:$1_skull"]
+      },
+      "$comment": "TODO: does not actually need support"
+    },
+    {
+      "name": "minecraft:{'zombie','creeper','piglin','dragon'}_wall_head",
+      "type": "wallSign",
+      "item": {
+        "name": ["minecraft:(.+)_wall_head", "minecraft:$1_head"]
+      }
+    },
+    {
+      "name": "minecraft:heavy_core",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:jukebox",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:ladder",
+      "type": "wallAttached"
+    },
+    {
+      "name": "minecraft:{'lodestone','respawn_anchor'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:spawner",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:nether_portal",
+      "type": "ignored"
+    },
+    {
+      "name": "minecraft:scaffolding",
+      "type": "bottomSupported",
+      "$comment": "TODO: supported by scaffolding to the side"
+    },
+    {
+      "name": "minecraft:{'wet_',''}sponge",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:suspicious_{'gravel','sand'}",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:tnt",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:trial_spawner",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:vault",
+      "type": "facingHorizontal"
+    }
+  ]
+}
