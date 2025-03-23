@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{color}_wool",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{color}_carpet",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:terracotta",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{color}{'glazed_',''}_terracotta",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{color}_concrete",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{color}_concrete_powder",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'tinted_',''}glass",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:glass_pane",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{color}_stained_glass{'_pane',''}",
+      "type": "normal"
+    }
+  ]
+}

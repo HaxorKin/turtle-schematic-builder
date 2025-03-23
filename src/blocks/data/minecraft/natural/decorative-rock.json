@@ -1,0 +1,14 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'bedrock','calcite','dripstone_block','magma_block','obsidian'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:pointed_dripstone",
+      "type": "todo",
+      "$comment": "TODO: top supported variant"
+    }
+  ]
+}

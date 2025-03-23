@@ -1,0 +1,79 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'chipped_','damaged_',''}anvil",
+      "type": "bottomSupportedFacing"
+    },
+    {
+      "name": "minecraft:barrel",
+      "type": "facing",
+      "inverted": true
+    },
+    {
+      "name": "minecraft:beacon",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:brewing_stand",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'cartography_table','crafting_table','enchanting_table','smithing_table'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'ender_',''}chest",
+      "type": "facingHorizontal",
+      "inverted": true
+    },
+    {
+      "name": "minecraft:{'furnace','blast_furnace','smoker'}",
+      "type": "facingHorizontal",
+      "inverted": true
+    },
+    {
+      "name": "minecraft:grindstone",
+      "type": "todo",
+      "$comment": "TODO: face + facing"
+    },
+    {
+      "name": "minecraft:{'lectern','loom','stonecutter'}",
+      "type": "facingHorizontal",
+      "inverted": true
+    },
+    {
+      "name": "minecraft:shulker_box",
+      "type": "facing"
+    },
+    {
+      "name": "minecraft:{color}_shulker_box",
+      "type": "facing"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae}_sign",
+      "type": "groundSign"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae}_wall_sign",
+      "type": "wallSign",
+      "item": {
+        "name": ["minecraft:(.+)_wall_sign", "minecraft:$1_sign"],
+        "stackSize": 16
+      }
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae}_hanging_sign",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae}_hanging_wall_sign",
+      "type": "wallSign",
+      "item": {
+        "name": ["minecraft:(.+)_hanging_wall_sign", "minecraft:$1_hanging_sign"],
+        "stackSize": 16
+      },
+      "$comment": "TODO: facing?"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'clay','dirt','coarse_dirt','grass_block','mycelium','podzol','rooted_dirt','mud'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{hyphae}_nylium",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:soul_{'sand','soil'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:gravel",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'red_',''}sand",
+      "type": "bottomSupported"
+    }
+  ]
+}

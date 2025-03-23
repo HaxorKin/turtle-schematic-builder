@@ -1,0 +1,72 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'small','medium','large'}_amethyst_bud",
+      "type": "todo",
+      "mightFailHitscan": true,
+      "$comment": "TODO: needs support on the (inverted) facing side"
+    },
+    {
+      "name": "minecraft:amethyst_cluster",
+      "type": "todo",
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:budding_amethyst",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:ancient_debris",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}coal_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}copper_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:raw_copper_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}diamond_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}emerald_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_','nether_',''}gold_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:raw_gold_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}iron_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:raw_iron_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}lapis_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}nether_quartz_ore",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'deepslate_',''}redstone_ore",
+      "type": "normal"
+    }
+  ]
+}

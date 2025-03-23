@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Build Planner Blocks Schema",
+  "description": "Schema for Minecraft block definitions in the build planner",
+  "type": "object",
+  "required": ["blocks"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["type"],
+            "properties": {
+              "$comment": {
+                "type": "string",
+                "description": "Comment for the block, not used in the build planner"
+              },
+              "pos": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "name": {
+                "type": "string",
+                "description": "Block identifier, can include variant patterns in curly braces",
+                "pattern": "^\\w+:(?:\\w+|{ *(?:'\\w*'|\\w+)(?: *, *(?:'\\w*'|\\w+))* *})+$"
+              },
+              "type": {
+                "type": "string",
+                "description": "Block logic to use"
+              },
+              "item": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^\\w+:\\w+$"
+                      },
+                      {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Regex matcher and replacer based on the block name"
+                      }
+                    ]
+                  },
+                  "stackSize": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "additionalProperties": false
+              },
+              "mightFailHitscan": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "oneOf": [
+              {
+                "title": "TODO, this block is not yet implemented",
+                "properties": {
+                  "type": {
+                    "const": "todo",
+                    "deprecated": true
+                  }
+                }
+              },
+              {
+                "title": "Ignored Block",
+                "properties": {
+                  "type": {
+                    "const": "ignored"
+                  }
+                }
+              },
+              {
+                "title": "Normal Block",
+                "properties": {
+                  "type": {
+                    "const": "normal"
+                  }
+                }
+              },
+              {
+                "title": "Stairlike Block",
+                "properties": {
+                  "type": {
+                    "const": "stairlike"
+                  }
+                }
+              },
+              {
+                "title": "Axis Block",
+                "properties": {
+                  "type": {
+                    "const": "axis"
+                  }
+                }
+              },
+              {
+                "title": "Facing Block",
+                "properties": {
+                  "type": {
+                    "const": "facing"
+                  },
+                  "inverted": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              {
+                "title": "Facing Horizontal Block",
+                "properties": {
+                  "type": {
+                    "const": "facingHorizontal"
+                  },
+                  "inverted": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              {
+                "title": "Liquid Block",
+                "properties": {
+                  "type": {
+                    "const": "liquid"
+                  },
+                  "maxMissingSupportBlocks": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              {
+                "title": "Bottom Supported Block",
+                "properties": {
+                  "type": {
+                    "const": "bottomSupported"
+                  }
+                }
+              },
+              {
+                "title": "Bottom Supported Facing Block",
+                "properties": {
+                  "type": {
+                    "const": "bottomSupportedFacing"
+                  }
+                }
+              },
+              {
+                "title": "Block with Ground Torch Logic",
+                "properties": {
+                  "type": {
+                    "const": "groundTorch"
+                  }
+                }
+              },
+              {
+                "title": "Block with Wall Torch Logic",
+                "properties": {
+                  "type": {
+                    "const": "wallTorch"
+                  }
+                }
+              },
+              {
+                "title": "Block with Ground Sign Logic",
+                "properties": {
+                  "type": {
+                    "const": "groundSign"
+                  }
+                }
+              },
+              {
+                "title": "Block with Wall Sign Logic",
+                "properties": {
+                  "type": {
+                    "const": "wallSign"
+                  }
+                }
+              },
+              {
+                "title": "Wall Attached Block",
+                "properties": {
+                  "type": {
+                    "const": "wallAttached"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "unevaluatedProperties": false
+      }
+    }
+  }
+}

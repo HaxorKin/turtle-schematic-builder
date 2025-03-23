@@ -1,0 +1,61 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{hyphae}_fungus",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:glow_lichen",
+      "type": "todo",
+      "$comment": "TODO: can be placed on any face"
+    },
+    {
+      "name": "minecraft:{'brown','red'}_mushroom",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'brown','red'}_mushroom_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:mushroom_stem",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:nether_sprouts",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:nether_wart",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'nether','warped'}_wart_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{hyphae}_roots",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:shroomlight",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:twisting_vines{'_plant',''}",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:twisting_vines"
+      }
+    },
+    {
+      "name": "minecraft:weeping_vines{'_plant',''}",
+      "type": "todo",
+      "$comment": "TODO: top supported",
+      "item": {
+        "name": "minecraft:weeping_vines"
+      }
+    }
+  ]
+}

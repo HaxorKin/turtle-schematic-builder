@@ -1,0 +1,25 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'stripped_',''}{wood}_{'log','wood'}",
+      "type": "axis"
+    },
+    {
+      "name": "minecraft:{'stripped_',''}{hyphae}_{'stem','hyphae'}",
+      "type": "axis"
+    },
+    {
+      "name": "minecraft:{'stripped_',''}bamboo_block",
+      "type": "axis"
+    },
+    {
+      "name": "minecraft:bamboo_mosaic",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae}_planks",
+      "type": "normal"
+    }
+  ]
+}

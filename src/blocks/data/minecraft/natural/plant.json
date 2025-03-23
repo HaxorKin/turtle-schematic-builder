@@ -1,0 +1,208 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'flowering_',''}azalea",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'bamboo','bamboo_sapling'}",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:bamboo"
+      }
+    },
+    {
+      "name": "minecraft:beetroots",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:beetroot_seeds"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:big_dripleaf{'_stem',''}",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:big_dripleaf"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:small_dripleaf",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'bush','dead_bush','fern','firefly_bush','short_dry_grass','short_grass'}",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'large_fern','tall_dry_grass','tall_grass'}",
+      "type": "todo",
+      "$comment": "TODO: small version + bonemeal"
+    },
+    {
+      "name": "minecraft:cactus",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:carrots",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:carrot"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:cave_vines{'_plant',''}",
+      "type": "todo",
+      "$comment": "TODO: top supported"
+    },
+    {
+      "name": "minecraft:cocoa",
+      "type": "wallAttached",
+      "item": {
+        "name": "minecraft:cocoa_beans"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:creaking_heart",
+      "type": "axis"
+    },
+    {
+      "name": "minecraft:hanging_roots",
+      "type": "todo",
+      "$comment": "TODO: top supported"
+    },
+    {
+      "name": "minecraft:leaf_litter",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{wood,'azalea','flowering_azalea'}_leaves",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:lily_pad",
+      "type": "todo",
+      "$comment": "TODO: on top of water or ice"
+    },
+    {
+      "name": "minecraft:mangrove_propagule",
+      "type": "bottomSupported",
+      "mightFailHitscan": true,
+      "$comment": "TODO: hanging variant is placed differently"
+    },
+    {
+      "name": "minecraft:mangrove_roots",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:muddy_mangrove_roots",
+      "type": "axis"
+    },
+    {
+      "name": "minecraft:melon",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'attached_',''}melon_stem",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:melon_seeds"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:{'pale_',''}moss_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'pale_',''}moss_carpet",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:pale_hanging_moss",
+      "type": "todo",
+      "$comment": "TODO: top supported"
+    },
+    {
+      "name": "minecraft:potatoes",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:potato"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:pumpkin",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:carved_pumpkin",
+      "type": "facingHorizontal",
+      "inverted": true
+    },
+    {
+      "name": "minecraft:{'attached_',''}pumpkin_stem",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:pumpkin_seeds"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:resin_clump",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{wood}_sapling",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:seagrass",
+      "type": "todo",
+      "$comment": "TODO: needs water"
+    },
+    {
+      "name": "minecraft:tall_seagrass",
+      "type": "todo",
+      "$comment": "TODO: seagrass + bonemeal"
+    },
+    {
+      "name": "minecraft:spore_blossom",
+      "type": "todo",
+      "$comment": "TODO: top supported"
+    },
+    {
+      "name": "minecraft:sugar_cane",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:sweet_berry_bush",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:sweet_berries"
+      },
+      "$comment": "Does not fail hitscan"
+    },
+    {
+      "name": "minecraft:vines",
+      "type": "todo",
+      "$comment": "TODO: can be supported on any side except bottom"
+    },
+    {
+      "name": "minecraft:wheat",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:wheat_seeds"
+      },
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:hay_block",
+      "type": "axis"
+    }
+  ]
+}

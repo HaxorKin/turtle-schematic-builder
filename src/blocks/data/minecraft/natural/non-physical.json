@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'soul_',''}fire",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:fire_charge"
+      },
+      "$comment": "TODO: replace with flint and steel"
+    }
+  ]
+}

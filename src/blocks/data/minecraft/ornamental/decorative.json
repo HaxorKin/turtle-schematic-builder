@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'bookshelf','crying_obsidian','gilded_blackstone','honeycomb_block','reinforced_deepslate'}",
+      "type": "normal"
+    }
+  ]
+}

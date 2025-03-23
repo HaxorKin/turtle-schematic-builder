@@ -1,0 +1,33 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'chiseled_',''}quartz_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:quartz_{'bricks','pillar'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:smooth_quartz",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'waxed_',''}copper_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'waxed_',''}{'exposed','weathered','oxidized'}_copper",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'waxed_',''}{'exposed_','weathered_','oxidized_',''}{'chiseled','cut'}_copper",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'waxed_',''}{'exposed_','weathered_','oxidized_',''}copper_grate",
+      "type": "normal"
+    }
+  ]
+}
