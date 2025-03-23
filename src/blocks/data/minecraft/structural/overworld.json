@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:bricks",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:packed_mud",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:mud_bricks",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:block_of_resin",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'chiseled_',''}resin_bricks",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'chiseled_','cut_','smooth_',''}{'red_',''}sandstone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:prismarine",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:prismarine_bricks",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:dark_prismarine",
+      "type": "normal"
+    }
+  ]
+}

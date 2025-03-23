@@ -8,10 +8,10 @@ export const woodTypes = [
   'dark_oak',
   'mangrove',
   'cherry',
-  'bamboo',
-  'crimson',
-  'warped',
+  'pale_oak',
 ] as const;
+export const hyphaeTypes = ['crimson', 'warped'] as const;
+/** @deprecated */
 export const copperTypes = [
   'copper',
   'exposed_copper',

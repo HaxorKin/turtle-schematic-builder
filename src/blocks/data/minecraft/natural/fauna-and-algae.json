@@ -1,0 +1,55 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{coral}_coral",
+      "type": "todo",
+      "$comment": "TODO: needs water"
+    },
+    {
+      "name": "minecraft:dead_{coral}_coral",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{coral}_coral_block",
+      "type": "todo",
+      "$comment": "TODO: needs water"
+    },
+    {
+      "name": "minecraft:dead_{coral}_coral_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{coral}_fan",
+      "type": "todo",
+      "$comment": "TODO: needs water"
+    },
+    {
+      "name": "minecraft:{coral}_wall_fan",
+      "type": "todo",
+      "$comment": "TODO: needs water"
+    },
+    {
+      "name": "minecraft:dead_{coral}_fan",
+      "type": "groundTorch"
+    },
+    {
+      "name": "minecraft:dead_{coral}_wall_fan",
+      "type": "wallTorch"
+    },
+    {
+      "name": "minecraft:kelp",
+      "type": "todo",
+      "$comment": "TODO: needs water"
+    },
+    {
+      "name": "minecraft:dried_kelp_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:sea_pickle",
+      "type": "bottomSupported",
+      "$comment": "TODO: stacking"
+    }
+  ]
+}

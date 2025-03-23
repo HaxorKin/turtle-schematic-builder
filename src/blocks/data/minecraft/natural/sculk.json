@@ -1,0 +1,26 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:sculk",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:sculk_catalyst",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'calibrated_',''}sculk_sensor",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:sculk_shrieker",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:sculk_vein",
+      "type": "todo",
+      "$comment": "TODO: any side supported + stacking"
+    }
+  ]
+}

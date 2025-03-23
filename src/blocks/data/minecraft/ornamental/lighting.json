@@ -1,0 +1,51 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:candle",
+      "type": "bottomSupported",
+      "mightFailHitscan": true,
+      "$comment": "TODO: Stacking candles and removing supporting block"
+    },
+    {
+      "name": "minecraft:{color}_candle",
+      "type": "bottomSupported",
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:end_rod",
+      "type": "facing",
+      "inverted": true
+    },
+    {
+      "name": "minecraft:{'pearlescent','verdant','ochre'}_froglight",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:glowstone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:jack_o_lantern",
+      "type": "facingHorizontal",
+      "inverted": true
+    },
+    {
+      "name": "minecraft:{'soul_',''}lantern",
+      "type": "todo",
+      "$comment": "Can be hanging"
+    },
+    {
+      "name": "minecraft:sea_lantern",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'soul_',''}torch",
+      "type": "groundTorch"
+    },
+    {
+      "name": "minecraft:{'soul_',''}wall_torch",
+      "type": "wallTorch"
+    }
+  ]
+}

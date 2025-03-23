@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:netherrack",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'cracked_','chiseled_','red_',''}nether_bricks",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:blackstone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'chiseled_',''}polished_blackstone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'cracked_',''}polished_blackstone_bricks",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'polished_','smooth_',''}basalt",
+      "type": "normal"
+    }
+  ]
+}

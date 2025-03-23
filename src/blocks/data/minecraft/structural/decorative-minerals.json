@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{'amethyst','coal','diamond','emerald','gold','iron','lapis','netherite','redstone'}_block",
+      "type": "normal"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:end_stone{'_bricks',''}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:purpur_{'block','pillar'}",
+      "type": "normal"
+    }
+  ]
+}

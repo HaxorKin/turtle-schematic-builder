@@ -16,13 +16,12 @@ import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
 import { nonInvertedRepeaterlikeBlocks } from './block.constants';
 
-// A repeaterlike block can be placed:
+// A bottom supported facing block can be placed:
 // - From above if the turtle is facing the same direction
-// - From below if the turtle is facing the same direction
 // If the turtle is on the side:
 // - The turtle is facing the same direction as the block and there is a block below the target block
 
-export class BlockToPlaceRepeaterlike
+export class BlockToPlaceBottomSupportedFacing
   extends BlockToPlaceBottomSupportedBase
   implements BlockToPlace
 {
@@ -69,4 +68,6 @@ export class BlockToPlaceRepeaterlike
   }
 }
 
-export const blockToPlaceRepeaterlikeFactory = classFactory(BlockToPlaceRepeaterlike);
+export const blockToPlaceBottomSupportedFacingFactory = classFactory(
+  BlockToPlaceBottomSupportedFacing,
+);

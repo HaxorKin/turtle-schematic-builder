@@ -1,0 +1,45 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:stone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:cobblestone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:mossy_cobblestone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:smooth_stone",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'chiseled_','cracked_','mossy_',''}stone_bricks",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'polished_',''}{'granite','diorite','andesite'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'chiseled_','cobbled_','polished_',''}deepslate",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'cracked_',''}deepslate_{'bricks','tiles'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'chiseled_','polished_',''}tuff",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'chiseled_',''}tuff_bricks",
+      "type": "normal"
+    }
+  ]
+}

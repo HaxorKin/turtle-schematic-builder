@@ -2,6 +2,7 @@ import assert from 'assert';
 import { BlockToPlace } from './blocks/bases/block-to-place';
 import { blockToPlaceAxisFactory } from './blocks/block-to-place-axis';
 import { blockToPlaceBottomSupportedFactory } from './blocks/block-to-place-bottom-supported';
+import { blockToPlaceBottomSupportedFacingFactory } from './blocks/block-to-place-bottom-supported-facing';
 import { blockToPlaceDoorFactory } from './blocks/block-to-place-door';
 import { blockToPlaceFacingFactory } from './blocks/block-to-place-facing';
 import { blockToPlaceFacingHorizontalFactory } from './blocks/block-to-place-facing-horizontal';
@@ -11,7 +12,6 @@ import { blockToPlaceLiquidFactory } from './blocks/block-to-place-liquid';
 import { blockToPlaceNormalFactory } from './blocks/block-to-place-normal';
 import { BlockToPlaceParams } from './blocks/block-to-place-params';
 import { blockToPlacePistonFactory } from './blocks/block-to-place-piston';
-import { blockToPlaceRepeaterlikeFactory } from './blocks/block-to-place-repeaterlike';
 import { blockToPlaceStairlikeFactory } from './blocks/block-to-place-stairlike';
 import { blockToPlaceWallAttachedFactory } from './blocks/block-to-place-wall-attached';
 import { blockToPlaceWallSignFactory } from './blocks/block-to-place-wall-sign';
@@ -94,7 +94,7 @@ const factoryMapping = Object.fromEntries(
       [facingBlocks, blockToPlaceFacingFactory],
       [facingHorizontalBlocks, blockToPlaceFacingHorizontalFactory],
       [hopperBlocks, blockToPlaceHopperFactory],
-      [repeaterlikeBlocks, blockToPlaceRepeaterlikeFactory],
+      [repeaterlikeBlocks, blockToPlaceBottomSupportedFacingFactory],
       [liquidBlocks, blockToPlaceLiquidFactory],
       [pistonBlocks, blockToPlacePistonFactory],
     ] as const

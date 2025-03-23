@@ -13,7 +13,7 @@ const palette: PlacementTestPalette = {
 
 const placement = createPlacementTest(palette);
 
-describe('BlockToPlaceRepeaterlike', () => {
+describe('BlockToPlaceBottomSupportedFacing', () => {
   placement({
     it: 'should be placeable from the west',
     layers: `

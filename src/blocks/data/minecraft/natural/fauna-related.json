@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:bee_nest",
+      "type": "facingHorizontal"
+    },
+    {
+      "name": "minecraft:bone_block",
+      "type": "axis"
+    },
+    {
+      "name": "minecraft:cobweb",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:dragon_egg",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:frogspawn",
+      "type": "todo",
+      "$comment": "TODO: bottom supported by water"
+    },
+    {
+      "name": "minecraft:infested_{stone,cobblestone,stone_bricks,mossy_stone_bricks,cracked_stone_bricks,chiseled_stone_bricks,deepslate}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:sniffer_egg",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:turtle_egg",
+      "type": "normal",
+      "$comment": "TODO: stacking"
+    }
+  ]
+}

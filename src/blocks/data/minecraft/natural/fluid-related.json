@@ -1,0 +1,48 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:bubble_column",
+      "type": "ignored"
+    },
+    {
+      "name": "minecraft:{'blue_','packed_',''}ice",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:lava",
+      "type": "liquid",
+      "item": {
+        "name": "minecraft:lava_bucket",
+        "stackSize": 1
+      }
+    },
+    {
+      "name": "minecraft:snow",
+      "type": "bottomSupported",
+      "mightFailHitscan": true,
+      "$comment": "TODO: stacking"
+    },
+
+    {
+      "name": "minecraft:powder_snow",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:powder_snow_bucket",
+        "stackSize": 1
+      }
+    },
+    {
+      "name": "minecraft:snow_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:water",
+      "type": "liquid",
+      "item": {
+        "name": "minecraft:water_bucket",
+        "stackSize": 1
+      }
+    }
+  ]
+}

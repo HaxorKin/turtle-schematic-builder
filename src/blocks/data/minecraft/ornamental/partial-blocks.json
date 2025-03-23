@@ -1,0 +1,89 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:chain",
+      "type": "axis"
+    },
+    {
+      "name": "minecraft:dirt_path",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae,'nether_brick'}_fence",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:iron_bars",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae,'bamboo_mosaic','stone','cobblestone','mossy_cobblestone','smooth_stone','stone_brick','mossy_stone_brick'}_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'polished_',''}{'granite','diorite','andesite'}_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'cobbled','polished'}_deepslate_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:deepslate_{'brick','tile'}_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'polished_',''}tuff_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:tuff_brick_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:brick_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:mud_brick_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:resin_brick_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'smooth_','cut_',''}{'red_',''}sandstone_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'prismarine','prismarine_brick','dark_prismarine'}_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'red_',''}nether_brick_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'blackstone','polished_blackstone','polished_blackstone_brick'}_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:end_stone_brick_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:purpur_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'smooth_',''}quartz_slab",
+      "type": "todo"
+    },
+    {
+      "name": "minecraft:{'waxed_',''}{'exposed_','weathered_','oxidized_',''}cut_copper_slab",
+      "type": "todo"
+    }
+  ]
+}
