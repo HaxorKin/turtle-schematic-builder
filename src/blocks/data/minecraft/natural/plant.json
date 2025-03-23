@@ -141,8 +141,7 @@
     },
     {
       "name": "minecraft:carved_pumpkin",
-      "type": "facingHorizontal",
-      "inverted": true
+      "type": "facingHorizontal"
     },
     {
       "name": "minecraft:{'attached_',''}pumpkin_stem",

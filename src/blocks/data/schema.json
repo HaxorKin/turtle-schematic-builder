@@ -31,7 +31,7 @@
               "name": {
                 "type": "string",
                 "description": "Block identifier, can include variant patterns in curly braces",
-                "pattern": "^\\w+:(?:\\w+|{ *(?:'\\w*'|\\w+)(?: *, *(?:'\\w*'|\\w+))* *})+$"
+                "pattern": "^[a-z_]+:(?:[a-z_]+|{ *(?:'[a-z_]*'|\\w+)(?: *, *(?:'[a-z_]*'|\\w+))* *})+$"
               },
               "type": {
                 "type": "string",
@@ -44,7 +44,7 @@
                     "oneOf": [
                       {
                         "type": "string",
-                        "pattern": "^\\w+:\\w+$"
+                        "pattern": "^[a-z_]+:[a-z_]+$"
                       },
                       {
                         "type": "array",
@@ -119,7 +119,8 @@
                     "const": "facing"
                   },
                   "inverted": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               },
@@ -130,7 +131,8 @@
                     "const": "facingHorizontal"
                   },
                   "inverted": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               },
@@ -159,6 +161,10 @@
                 "properties": {
                   "type": {
                     "const": "bottomSupportedFacing"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               },
@@ -175,6 +181,10 @@
                 "properties": {
                   "type": {
                     "const": "wallTorch"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               },
@@ -191,6 +201,10 @@
                 "properties": {
                   "type": {
                     "const": "wallSign"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               },
@@ -199,6 +213,10 @@
                 "properties": {
                   "type": {
                     "const": "wallAttached"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               }

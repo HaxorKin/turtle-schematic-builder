@@ -14,8 +14,7 @@
     },
     {
       "name": "minecraft:end_rod",
-      "type": "facing",
-      "inverted": true
+      "type": "facing"
     },
     {
       "name": "minecraft:{'pearlescent','verdant','ochre'}_froglight",
@@ -27,8 +26,7 @@
     },
     {
       "name": "minecraft:jack_o_lantern",
-      "type": "facingHorizontal",
-      "inverted": true
+      "type": "facingHorizontal"
     },
     {
       "name": "minecraft:{'soul_',''}lantern",

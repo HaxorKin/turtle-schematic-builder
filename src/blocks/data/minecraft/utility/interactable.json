@@ -7,8 +7,7 @@
     },
     {
       "name": "minecraft:barrel",
-      "type": "facing",
-      "inverted": true
+      "type": "facing"
     },
     {
       "name": "minecraft:beacon",
@@ -24,23 +23,20 @@
     },
     {
       "name": "minecraft:{'ender_',''}chest",
-      "type": "facingHorizontal",
-      "inverted": true
+      "type": "facingHorizontal"
     },
     {
       "name": "minecraft:{'furnace','blast_furnace','smoker'}",
-      "type": "facingHorizontal",
-      "inverted": true
+      "type": "facingHorizontal"
     },
     {
       "name": "minecraft:grindstone",
-      "type": "todo",
+      "type": "facingHorizontal",
       "$comment": "TODO: face + facing"
     },
     {
       "name": "minecraft:{'lectern','loom','stonecutter'}",
-      "type": "facingHorizontal",
-      "inverted": true
+      "type": "facingHorizontal"
     },
     {
       "name": "minecraft:shulker_box",
