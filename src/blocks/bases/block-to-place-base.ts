@@ -1,38 +1,24 @@
 import { Constructor } from 'type-fest';
 import { dirCount, vectorToSingleDir } from '../../components/dir';
-import { PaletteBlock } from '../../components/nbt.validator';
+import { InventoryItem } from '../../components/inventory/inventory-item';
 import { Reachability } from '../../components/reachability';
 import { TurtleState } from '../../components/turtle-state';
 import { Vector, subVectors } from '../../components/vector';
 import { isTurtleReachable } from '../../helpers/reachability-helpers';
-import { blockItemMapping } from '../block.constants';
 import { BlockToPlace } from './block-to-place';
 
 export abstract class BlockToPlaceBase
   extends (Array as unknown as Constructor<Vector>)
-  implements
-    Pick<
-      BlockToPlace,
-      | 'id'
-      | 'itemName'
-      | 'isReachable'
-      | 'isConditionSatisfied'
-      | 'reachabilityDirections'
-      | 'reachabilityCount'
-    >
+  implements BlockToPlace
 {
-  readonly itemName: string;
+  abstract dependencyDirections: number | undefined;
 
   constructor(
     readonly id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
+    pos: Vector,
+    readonly items: InventoryItem[],
   ) {
-    super(x, y, z);
-    const blockName = paletteBlock.Name.value;
-    this.itemName = blockItemMapping[blockName] ?? blockName;
+    super(...pos);
   }
 
   isReachable(reachability: Reachability) {
@@ -48,6 +34,7 @@ export abstract class BlockToPlaceBase
       return false;
     }
 
+    // Without blocksToPlace, so only the current state is considered
     const reachabilityDirections = this.reachabilityDirections(reachability);
     if (reachabilityDirections === undefined) {
       return true;

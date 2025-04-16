@@ -5,9 +5,9 @@
       "name": "minecraft:{'soul_',''}fire",
       "type": "bottomSupported",
       "item": {
-        "name": "minecraft:fire_charge"
-      },
-      "$comment": "TODO: replace with flint and steel"
+        "name": "minecraft:flint_and_steel",
+        "durability": 64
+      }
     }
   ]
 }

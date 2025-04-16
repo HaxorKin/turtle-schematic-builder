@@ -1,4 +1,6 @@
-import { PriorityQueue } from '@js-sdsl/priority-queue';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { PriorityQueue } from '@datastructures-js/priority-queue';
+import { StateKey } from '../helpers/get-state-key';
 import { AstarNode } from './astar-node';
 
 export class HeuristicOptimizer {
@@ -8,6 +10,7 @@ export class HeuristicOptimizer {
   private readonly stepAfterNoImprovement: number;
   private readonly heuristicMultiplierStep: number;
   private heuristicMultiplier: number;
+  private readonly trimThreshold: number;
   private noImprovementCounter = 0;
   private blocksPlaced = 0;
 
@@ -15,28 +18,45 @@ export class HeuristicOptimizer {
     stepAfterNoImprovement,
     heuristicMultiplierStep,
     initialHeuristicMultiplier,
+    trimThreshold,
   }: Readonly<{
     stepAfterNoImprovement: number;
     heuristicMultiplierStep: number;
     initialHeuristicMultiplier: number;
+    trimThreshold: number;
   }>) {
     this.stepAfterNoImprovement = stepAfterNoImprovement;
     this.heuristicMultiplierStep = heuristicMultiplierStep;
     this.heuristicMultiplier = initialHeuristicMultiplier;
+    this.trimThreshold = trimThreshold;
   }
 
   private static trimBuffers(
     openSetBuffer: AstarNode[],
-    closedSet: Map<string, number>,
+    closedSet: Map<StateKey, number>,
     threshold: number,
   ) {
-    openSetBuffer.sort((a, b) => b.totalBlocksPlaced - a.totalBlocksPlaced);
-    const cutoff = openSetBuffer.findIndex(
-      (node) => node.totalBlocksPlaced < threshold,
-    );
-    if (cutoff !== -1) {
-      openSetBuffer.length = cutoff;
+    if (threshold <= 0) {
+      return;
     }
+
+    // Partition the array so elements with totalBlocksPlaced >= threshold are at the beginning
+    let partitionIndex = 0;
+    for (let i = 0; i < openSetBuffer.length; i++) {
+      const node = openSetBuffer[i]!;
+      if (node.totalBlocksPlaced >= threshold) {
+        if (i !== partitionIndex) {
+          // Swap elements
+          [openSetBuffer[i], openSetBuffer[partitionIndex]] = [
+            openSetBuffer[partitionIndex]!,
+            node,
+          ];
+        }
+        partitionIndex++;
+      }
+    }
+    // Trim the array to contain only elements that meet the threshold
+    openSetBuffer.length = partitionIndex;
 
     for (const [key, value] of closedSet) {
       if (value < threshold) {
@@ -62,13 +82,9 @@ export class HeuristicOptimizer {
     currentNode: AstarNode,
     openSetBuffer: AstarNode[],
     openSet: PriorityQueue<AstarNode>,
-    closedSet: Map<string, number>,
+    closedSet: Map<StateKey, number>,
   ) {
     if (currentNode.totalBlocksPlaced > this.blocksPlaced) {
-      console.log(
-        `Blocks remaining: ${currentNode.gameState.blocksToPlace.size}, fCost: ${currentNode.fCost}, gCost: ${currentNode.gCost}, hCost: ${currentNode.hCost}`,
-      );
-
       this.blocksPlaced = currentNode.totalBlocksPlaced;
       this.best = currentNode;
       if (this.heuristicMultiplier > 0) {
@@ -77,34 +93,29 @@ export class HeuristicOptimizer {
 
         HeuristicOptimizer.recalculateFcosts(openSetBuffer, this.heuristicMultiplier);
         openSet = new PriorityQueue<AstarNode>(
-          openSetBuffer,
           (a, b) => a.fCost - b.fCost,
-          false,
+          openSetBuffer,
         );
       }
       this.noImprovementCounter = 0;
     } else {
       this.noImprovementCounter++;
       if (this.noImprovementCounter >= this.stepAfterNoImprovement) {
-        console.log(
-          `Blocks remaining: ${currentNode.gameState.blocksToPlace.size}, fCost: ${currentNode.fCost}, gCost: ${currentNode.gCost}, hCost: ${currentNode.hCost}`,
-        );
-
         this.heuristicMultiplier += this.heuristicMultiplierStep;
 
         this.noImprovementCounter = 0;
         HeuristicOptimizer.trimBuffers(
           openSetBuffer,
           closedSet,
-          this.blocksPlaced >> 1,
+          Math.floor(this.blocksPlaced * this.trimThreshold),
         );
         HeuristicOptimizer.recalculateFcosts(openSetBuffer, this.heuristicMultiplier);
         openSet = new PriorityQueue<AstarNode>(
-          openSetBuffer,
           (a, b) => a.fCost - b.fCost,
-          false,
+          openSetBuffer,
         );
 
+        // Yield for better GC
         await Promise.resolve();
       }
     }

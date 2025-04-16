@@ -20,6 +20,7 @@
     {
       "name": "minecraft:sculk_vein",
       "type": "todo",
+      "mightFailHitscan": true,
       "$comment": "TODO: any side supported + stacking"
     }
   ]

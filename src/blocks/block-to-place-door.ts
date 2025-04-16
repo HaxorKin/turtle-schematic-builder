@@ -1,36 +1,37 @@
 import assert from 'assert';
 import { vectorToSingleDir } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
-import { NULL_VECTOR, Vector, facingMapping, subVectors } from '../components/vector';
+import {
+  UP,
+  Vector,
+  addVectors,
+  facingMapping,
+  invertVector,
+  subVectors,
+} from '../components/vector';
 import { isTurtleReachable } from '../helpers/reachability-helpers';
 import { BlockToPlace } from './bases/block-to-place';
-import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
 import { BlockToPlaceNull } from './block-to-place-null';
+import { DataDrivenBlockDoor } from './data-parser/data-driven-block.type';
+import { bottomSupportedMixin } from './mixins/block-to-place-bottom-supported.mixin';
 
-export class BlockToPlaceDoor
-  extends BlockToPlaceBottomSupportedBase
-  implements BlockToPlace
-{
+export class BlockToPlaceDoor extends bottomSupportedMixin(BlockToPlaceBase) {
   readonly extraBlocks: BlockToPlace[];
-  readonly facing: Vector;
   readonly dependencyDirections: number;
 
-  constructor(id: number, x: number, y: number, z: number, paletteBlock: PaletteBlock) {
-    super(id, x, y, z, paletteBlock);
+  constructor(
+    id: number,
+    pos: Vector,
+    items: InventoryItem[],
+    readonly facing: Vector,
+  ) {
+    super(id, pos, items);
 
-    const properties = paletteBlock.Properties?.value;
-    assert(properties, 'Door block must have properties');
-    const facing = properties.facing?.value;
-    assert(facing, 'Door block must have facing property');
-    this.facing = facingMapping[facing];
-
-    assert(properties.half?.value === 'lower', 'Door block must be a lower half block');
-
-    this.dependencyDirections = vectorToSingleDir(subVectors(NULL_VECTOR, this.facing));
-    this.extraBlocks = [
-      new BlockToPlaceDoorUpper(id, x, y + 1, z, paletteBlock, this.facing),
-    ];
+    this.dependencyDirections = vectorToSingleDir(invertVector(facing));
+    this.extraBlocks = [new BlockToPlaceDoorUpper(id, addVectors(pos, UP), [], facing)];
   }
 
   reachabilityDirections(reachability: Reachability): number {
@@ -40,32 +41,39 @@ export class BlockToPlaceDoor
   }
 }
 
-class BlockToPlaceDoorUpper extends BlockToPlaceNull implements BlockToPlace {
+class BlockToPlaceDoorUpper extends BlockToPlaceNull {
   constructor(
     id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
+    pos: Vector,
+    items: InventoryItem[],
     private readonly facing: Vector,
   ) {
-    super(id, x, y, z, paletteBlock);
+    super(id, pos, items);
   }
 
   override reachabilityDirections(): number {
-    return vectorToSingleDir(subVectors(NULL_VECTOR, this.facing));
+    return vectorToSingleDir(invertVector(this.facing));
   }
 }
 
 export function blockToPlaceDoorFactory(
   id: number,
-  x: number,
-  y: number,
-  z: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: DataDrivenBlockDoor,
   paletteBlock: PaletteBlock,
 ) {
+  const properties = paletteBlock.Properties?.value;
+  assert(properties, 'Door block must have properties');
+
   if (paletteBlock.Properties?.value.half?.value === 'lower') {
-    return new BlockToPlaceDoor(id, x, y, z, paletteBlock);
+    const facing = properties.facing?.value;
+    assert(facing, 'Door block must have facing property');
+    let facingVector = facingMapping[facing];
+    if (dataDrivenBlock.inverted) {
+      facingVector = invertVector(facingVector);
+    }
+    return new BlockToPlaceDoor(id, pos, items, facingVector);
   }
   return undefined;
 }

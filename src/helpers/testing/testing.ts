@@ -3,7 +3,7 @@ import { NBT } from 'prismarine-nbt';
 import { BlockToPlace } from '../../blocks/bases/block-to-place';
 import { BlockToPlaceBase } from '../../blocks/bases/block-to-place-base';
 import { GameState, GameStateEnvironment } from '../../components/game-state';
-import { InventoryState } from '../../components/inventory';
+import { InventoryState } from '../../components/inventory/inventory';
 import { PaletteBlock, SchematicNbt } from '../../components/nbt.validator';
 import { Reachability, ReachabilityState } from '../../components/reachability';
 import { Schematic } from '../../components/schematic';
@@ -15,23 +15,16 @@ import { isBlock } from '../reachability-helpers';
 import { airNbt } from './mock-nbts';
 import { graphemes } from './text';
 
-class BlockToPlaceTestDummy extends BlockToPlaceBase implements BlockToPlace {
+class BlockToPlaceTestDummy extends BlockToPlaceBase {
   extraBlocks?: BlockToPlace[];
 
   constructor(
     id: number,
-    x: number,
-    y: number,
-    z: number,
+    pos: Vector,
     public dependencyDirections: number | undefined,
     private readonly _reachabilityDirections?: number,
   ) {
-    super(id, x, y, z, {
-      Name: {
-        type: 'string',
-        value: 'minecraft:stone',
-      },
-    });
+    super(id, pos, []);
   }
 
   reachabilityDirections(): number | undefined {
@@ -54,9 +47,7 @@ export function createBlock(
 ) {
   const block = new BlockToPlaceTestDummy(
     ++id,
-    x,
-    y,
-    z,
+    [x, y, z],
     dependencyDirections,
     reachabilityDirections,
   );
@@ -318,7 +309,7 @@ export function createPlacementTest(palette: PlacementTestPalette) {
     it: string;
     layers: string;
     fail?: boolean;
-    origin?: [number, number, number];
+    origin?: Vector;
     turtleIsOver?: string;
   }) => {
     it(name, () => {

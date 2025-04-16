@@ -3,11 +3,11 @@ import assert from 'assert';
 import { BlockToPlace } from '../blocks/bases/block-to-place';
 import { BlockToPlaceLiquid, BlockToPlaceWater } from '../blocks/block-to-place-liquid';
 import { BlockToPlacePistonhead } from '../blocks/block-to-place-piston';
-import { blocksToPlaceItemNames } from '../helpers/blocks-to-place-itemnames';
+import { blocksToPlaceItems } from '../helpers/blocks-to-place-items';
 import { isBlock, isTurtleReachable } from '../helpers/reachability-helpers';
-import { Action, actionCosts } from './action';
+import { Action, actionCosts, SimpleAction } from './action';
 import { dirCount } from './dir';
-import { InventoryState } from './inventory';
+import { InventoryState } from './inventory/inventory';
 import { findPath } from './pathfinding';
 import { Reachability, ReachabilityState } from './reachability';
 import { TurtleState } from './turtle-state';
@@ -33,13 +33,16 @@ export class GameState {
     public readonly inventoryCredit: InventoryState,
   ) {}
 
-  getPossibleActions(): (Action | [Action, GameState])[] {
+  getPossibleActions(): (SimpleAction | [SimpleAction, GameState])[] {
     const { reachability, turtle, inventoryCredit } = this;
-    if (inventoryCredit.addableItemRatio === 0) {
+    if (inventoryCredit.addableItemsetRatio === 0) {
       return [];
     }
 
-    const actions: (Action | [Action, GameState])[] = ['turnLeft', 'turnRight'];
+    const actions: (SimpleAction | [SimpleAction, GameState])[] = [
+      'turnLeft',
+      'turnRight',
+    ];
     const { position, direction } = turtle;
 
     const forwardPosition = addVectors(position, direction);
@@ -239,7 +242,7 @@ export class GameState {
     const blockToPlace = blocksToPlace.get(String(position));
     if (
       !blockToPlace?.isPlaceable(reachability, turtle, blocksToPlace) ||
-      !this.inventoryCredit.canAddItem(blockToPlace.itemName)
+      !this.inventoryCredit.canAddItems(blockToPlace.items)
     ) {
       return undefined;
     }
@@ -326,10 +329,9 @@ export class GameState {
       newBlocksToPlace,
       this.turtle,
       newReachability,
-      this.inventoryCredit.addItem(
-        blockToPlace.itemName,
-        blocksToPlaceItemNames(newBlocksToPlace),
-        newBlocksToPlace.size,
+      this.inventoryCredit.addItems(
+        blockToPlace.items,
+        blocksToPlaceItems(newBlocksToPlace),
       ),
     );
   }
@@ -358,7 +360,7 @@ export class GameState {
         this.reachability,
         this.inventoryCredit.clear(),
       ),
-      costSum * this.inventoryCredit.addableItemRatio,
+      costSum * this.inventoryCredit.addableItemsetRatio,
     ];
   }
 }

@@ -3,132 +3,194 @@ import { BlockToPlace } from './blocks/bases/block-to-place';
 import { blockToPlaceAxisFactory } from './blocks/block-to-place-axis';
 import { blockToPlaceBottomSupportedFactory } from './blocks/block-to-place-bottom-supported';
 import { blockToPlaceBottomSupportedFacingFactory } from './blocks/block-to-place-bottom-supported-facing';
+import { blockToPlaceBottomSupportedTwoTallFactory } from './blocks/block-to-place-bottom-supported-two-tall';
 import { blockToPlaceDoorFactory } from './blocks/block-to-place-door';
+import { blockToPlaceFaceAttachedFacingFactory } from './blocks/block-to-place-face-attached-facing';
+import { blockToPlaceFaceFacingFactory } from './blocks/block-to-place-face-facing';
 import { blockToPlaceFacingFactory } from './blocks/block-to-place-facing';
 import { blockToPlaceFacingHorizontalFactory } from './blocks/block-to-place-facing-horizontal';
+import { blockToPlaceGroundSignFactory } from './blocks/block-to-place-ground-sign';
 import { blockToPlaceGroundTorchFactory } from './blocks/block-to-place-ground-torch';
 import { blockToPlaceHopperFactory } from './blocks/block-to-place-hopper';
 import { blockToPlaceLiquidFactory } from './blocks/block-to-place-liquid';
 import { blockToPlaceNormalFactory } from './blocks/block-to-place-normal';
-import { BlockToPlaceParams } from './blocks/block-to-place-params';
 import { blockToPlacePistonFactory } from './blocks/block-to-place-piston';
+import { blockToPlaceSlabFactory } from './blocks/block-to-place-slab';
 import { blockToPlaceStairlikeFactory } from './blocks/block-to-place-stairlike';
+import { blockToPlaceTopSupportedFactory } from './blocks/block-to-place-top-supported';
 import { blockToPlaceWallAttachedFactory } from './blocks/block-to-place-wall-attached';
 import { blockToPlaceWallSignFactory } from './blocks/block-to-place-wall-sign';
 import { blockToPlaceWallTorchFactory } from './blocks/block-to-place-wall-torch';
-import { copperTypes, woodTypes } from './blocks/block.constants';
+import { DataDrivenBlock } from './blocks/data-parser/data-driven-block.type';
+import {
+  dataDrivenBlocks as defaultDataDrivenBlocks,
+  positionOverrides as defaultPositionOverrides,
+} from './blocks/data-parser/parsed-data';
 import { Dir } from './components/dir';
+import {
+  getInventoryItems,
+  InventoryItem,
+} from './components/inventory/inventory-item';
 import { PaletteBlock } from './components/nbt.validator';
 import { Reachability } from './components/reachability';
 import { Schematic } from './components/schematic';
+import { Vector } from './components/vector';
+import { WeakrefMap } from './helpers/weakrefmap';
 
-const normalBlocks = [
-  'minecraft:cobblestone',
-  'minecraft:cobblestone_wall',
-  'minecraft:composter',
-  'minecraft:crafting_table',
-  'minecraft:glass_pane',
-  'minecraft:moss_block',
-  'minecraft:mossy_cobblestone',
-  'minecraft:oak_fence',
-  'minecraft:oak_planks',
-  'minecraft:stone',
+type FactoryArgs<K extends DataDrivenBlock['type']> = [
+  id: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: Extract<DataDrivenBlock, { type: K }>,
+  paletteBlock: PaletteBlock,
+  schematic: Schematic,
 ];
 
-const stairlikeBlocks = [
-  ...[...woodTypes, ...copperTypes].map((type) => `minecraft:${type}_stairs`),
-  ...['iron', ...woodTypes, ...copperTypes].map((type) => `minecraft:${type}_trapdoor`),
-];
-const axisBlocks = woodTypes.map((type) => `minecraft:${type}_log`);
-const bottomSupportedBlocks = [
-  'minecraft:oak_pressure_plate',
-  'minecraft:stone_pressure_plate',
-  'minecraft:redstone_wire',
-];
-const doorBlocks = ['minecraft:oak_door'];
-const groundTorchBlocks = [
-  'minecraft:torch',
-  'minecraft:soul_torch',
-  'minecraft:redstone_torch',
-];
-const wallTorchBlocks = [
-  'minecraft:wall_torch',
-  'minecraft:soul_wall_torch',
-  'minecraft:redstone_wall_torch',
-];
-const wallSignBlocks = woodTypes.map((type) => `minecraft:${type}_wall_sign`);
+type FactoryMapping = {
+  [K in DataDrivenBlock['type']]: (...args: FactoryArgs<K>) => BlockToPlace | undefined;
+};
 
-const wallAttachedBlocks = ['minecraft:ladder'];
+const factoryMapping: FactoryMapping = {
+  todo: (...args) => {
+    const dataArgIndex = 3;
+    const blockName = args[dataArgIndex].name;
+    console.warn(`Block ${blockName} not supported`);
+    return undefined;
+  },
+  ignored: () => undefined,
 
-const facingBlocks = ['minecraft:observer', 'minecraft:dispenser', 'minecraft:dropper'];
-const pistonBlocks = ['minecraft:piston', 'minecraft:sticky_piston'];
+  axis: blockToPlaceAxisFactory,
+  bottomSupported: blockToPlaceBottomSupportedFactory,
+  bottomSupportedFacing: blockToPlaceBottomSupportedFacingFactory,
+  bottomSupportedTwoTall: blockToPlaceBottomSupportedTwoTallFactory,
+  door: blockToPlaceDoorFactory,
+  faceAttachedFacing: blockToPlaceFaceAttachedFacingFactory,
+  faceFacing: blockToPlaceFaceFacingFactory,
+  facing: blockToPlaceFacingFactory,
+  facingHorizontal: blockToPlaceFacingHorizontalFactory,
+  groundSign: blockToPlaceGroundSignFactory,
+  groundTorch: blockToPlaceGroundTorchFactory,
+  hopper: blockToPlaceHopperFactory,
+  liquid: blockToPlaceLiquidFactory,
+  normal: blockToPlaceNormalFactory,
+  piston: blockToPlacePistonFactory,
+  slab: blockToPlaceSlabFactory,
+  stairlike: blockToPlaceStairlikeFactory,
+  topSupported: blockToPlaceTopSupportedFactory,
+  wallAttached: blockToPlaceWallAttachedFactory,
+  wallSign: blockToPlaceWallSignFactory,
+  wallTorch: blockToPlaceWallTorchFactory,
+} as const;
 
-const facingHorizontalBlocks = [
-  ...woodTypes.map((type) => `minecraft:${type}_fence_gate`),
-  'minecraft:chest',
-  'minecraft:trapped_chest',
-  'minecraft:ender_chest',
-  'minecraft:furnace',
+function callFactory<T extends DataDrivenBlock['type']>(
+  blockType: T,
+  ...args: FactoryArgs<T>
+) {
+  const factory = factoryMapping[blockType];
+  return factory(...args);
+}
 
-  'computercraft:turtle_normal',
-  'computercraft:turtle_advanced',
-];
-
-const hopperBlocks = ['minecraft:hopper'];
-const repeaterlikeBlocks = ['minecraft:repeater', 'minecraft:comparator'];
-
-const liquidBlocks = ['minecraft:water', 'minecraft:lava'];
-
-const factoryMapping = Object.fromEntries(
-  (
-    [
-      [stairlikeBlocks, blockToPlaceStairlikeFactory],
-      [axisBlocks, blockToPlaceAxisFactory],
-      [bottomSupportedBlocks, blockToPlaceBottomSupportedFactory],
-      [doorBlocks, blockToPlaceDoorFactory],
-      [groundTorchBlocks, blockToPlaceGroundTorchFactory],
-      [wallTorchBlocks, blockToPlaceWallTorchFactory],
-      [wallSignBlocks, blockToPlaceWallSignFactory],
-      [wallAttachedBlocks, blockToPlaceWallAttachedFactory],
-      [normalBlocks, blockToPlaceNormalFactory],
-      [facingBlocks, blockToPlaceFacingFactory],
-      [facingHorizontalBlocks, blockToPlaceFacingHorizontalFactory],
-      [hopperBlocks, blockToPlaceHopperFactory],
-      [repeaterlikeBlocks, blockToPlaceBottomSupportedFacingFactory],
-      [liquidBlocks, blockToPlaceLiquidFactory],
-      [pistonBlocks, blockToPlacePistonFactory],
-    ] as const
-  ).flatMap(([blockNames, factory]) =>
-    blockNames.map((blockName) => [blockName, factory] as const),
-  ),
-);
-
-function createBlockToPlace(
-  blockIdCounter: number,
+type GetPositionOverrideFn = (
   x: number,
   y: number,
   z: number,
-  block: PaletteBlock,
-  schematic: Schematic,
-  blockParameters: Map<string, BlockToPlaceParams>,
-): BlockToPlace | undefined {
-  const blockName = block.Name.value;
+  blockName: string,
+) => DataDrivenBlock | undefined;
+
+interface CreateBlockToPlaceParams {
+  blockIdCounter: number;
+  x: number;
+  y: number;
+  z: number;
+  paletteBlock: PaletteBlock;
+  schematic: Schematic;
+  dataDrivenBlocks: Map<string, DataDrivenBlock>;
+  getPositionOverride: GetPositionOverrideFn;
+}
+
+const dataDrivenBlockFallbackCache = new WeakrefMap<string, DataDrivenBlock>();
+function getDataDrivenBlock(
+  dataDrivenBlocks: Map<string, DataDrivenBlock>,
+  blockName: string,
+) {
+  let dataDrivenBlock = dataDrivenBlocks.get(blockName);
+  if (dataDrivenBlock) {
+    return dataDrivenBlock;
+  }
+
+  dataDrivenBlock = dataDrivenBlockFallbackCache.get(blockName);
+  if (dataDrivenBlock) {
+    return dataDrivenBlock;
+  }
+
+  dataDrivenBlock = {
+    name: blockName,
+    type: 'normal',
+  };
+  dataDrivenBlockFallbackCache.set(blockName, dataDrivenBlock);
+  return dataDrivenBlock;
+}
+
+function getDataDrivenBlockWithOverride(
+  x: number,
+  y: number,
+  z: number,
+  dataDrivenBlocks: Map<string, DataDrivenBlock>,
+  paletteBlock: PaletteBlock,
+  getPositionOverride: GetPositionOverrideFn,
+): DataDrivenBlock | undefined {
+  const blockName = paletteBlock.Name.value;
   if (blockName === 'minecraft:air') {
     return undefined;
   }
 
-  const factory = factoryMapping[blockName];
-  if (!factory) {
-    console.log(`Block ${blockName} not supported`);
+  const dataDrivenBlock =
+    getPositionOverride(x, y, z, blockName) ??
+    getDataDrivenBlock(dataDrivenBlocks, blockName);
+
+  if (dataDrivenBlock.type === 'ignored') {
     return undefined;
   }
 
-  const blockKey = `${x},${y},${z}`;
-  const blockParams = blockParameters.get(blockKey);
-  if (blockParams) {
-    blockParameters.delete(blockKey);
+  return dataDrivenBlock;
+}
+
+function createBlockToPlace({
+  blockIdCounter,
+  x,
+  y,
+  z,
+  paletteBlock,
+  schematic,
+  dataDrivenBlocks,
+  getPositionOverride,
+}: CreateBlockToPlaceParams): [BlockToPlace | undefined, DataDrivenBlock | undefined] {
+  const dataDrivenBlock = getDataDrivenBlockWithOverride(
+    x,
+    y,
+    z,
+    dataDrivenBlocks,
+    paletteBlock,
+    getPositionOverride,
+  );
+  if (!dataDrivenBlock) {
+    return [undefined, undefined];
   }
-  return factory(blockIdCounter, x, y, z, block, schematic, blockParams);
+
+  const items = getInventoryItems(dataDrivenBlock, paletteBlock);
+
+  return [
+    callFactory(
+      dataDrivenBlock.type,
+      blockIdCounter,
+      [x, y, z],
+      items,
+      dataDrivenBlock,
+      paletteBlock,
+      schematic,
+    ),
+    dataDrivenBlock,
+  ];
 }
 
 function isWaterlogged(block: PaletteBlock): boolean {
@@ -147,8 +209,9 @@ interface ProcessBlockParams {
   z: number;
   blockIdCounter: number;
   allBlocksToPlace: Map<string, BlockToPlace>;
-  blockParameters: Map<string, BlockToPlaceParams>;
   gateMap: Uint8Array;
+  dataDrivenBlocks: Map<string, DataDrivenBlock>;
+  getPositionOverride: GetPositionOverrideFn;
 }
 
 function processBlock({
@@ -159,19 +222,21 @@ function processBlock({
   z,
   blockIdCounter,
   allBlocksToPlace,
-  blockParameters,
   gateMap,
+  dataDrivenBlocks,
+  getPositionOverride,
 }: ProcessBlockParams): boolean {
   const paletteBlock = schematic.at(x, y, z);
-  const blockToPlace = createBlockToPlace(
+  const [blockToPlace, dataDrivenBlock] = createBlockToPlace({
     blockIdCounter,
     x,
     y,
     z,
     paletteBlock,
     schematic,
-    blockParameters,
-  );
+    dataDrivenBlocks,
+    getPositionOverride,
+  });
 
   if (blockToPlace) {
     const [width, height] = schematic.size;
@@ -190,23 +255,27 @@ function processBlock({
     }
 
     if (isWaterlogged(paletteBlock)) {
-      const waterloggedKey = String(blockToPlace) + 'w';
-      const waterloggedParams = blockParameters.get(waterloggedKey);
-      if (waterloggedParams) {
-        blockParameters.delete(waterloggedKey);
-      }
-
-      const waterBlock = blockToPlaceLiquidFactory(
-        blockIdCounter,
+      const waterlogData = getDataDrivenBlockWithOverride(
         x,
         y,
         z,
+        dataDrivenBlocks,
+        waterlogWaterPaletteBlock,
+        getPositionOverride,
+      );
+      assert(waterlogData?.type === 'liquid');
+
+      const waterBlock = blockToPlaceLiquidFactory(
+        blockIdCounter,
+        blockToPlace,
+        getInventoryItems(waterlogData, waterlogWaterPaletteBlock),
+        waterlogData,
         waterlogWaterPaletteBlock,
         schematic,
-        waterloggedParams,
+        dataDrivenBlock?.mightFailHitscan,
       );
       assert(waterBlock, 'Failed to create water block');
-      allBlocksToPlace.set(waterloggedKey, waterBlock);
+      allBlocksToPlace.set(`${blockToPlace}w`, waterBlock);
     }
 
     return true;
@@ -216,7 +285,8 @@ function processBlock({
 
 export function createBlocksToPlace(
   schematic: Schematic,
-  blockParameters: Map<string, BlockToPlaceParams> | undefined,
+  dataDrivenBlocks = defaultDataDrivenBlocks,
+  positionOverrides = defaultPositionOverrides,
   reachability?: Reachability,
 ): [Map<string, BlockToPlace>, Uint8Array] {
   const [schematicWidth, schematicHeight, schematicDepth] = schematic.size;
@@ -228,7 +298,15 @@ export function createBlocksToPlace(
 
   let blockIdCounter = 0;
   const allBlocksToPlace = new Map<string, BlockToPlace>();
-  blockParameters = new Map(blockParameters); // Copy the map to avoid modifying the original
+  const unusedPositionOverrides = new Set<string>(positionOverrides.keys());
+  const getPositionOverride = (x: number, y: number, z: number, blockName: string) => {
+    const positionOverrideKey = `${x},${y},${z}:${blockName}`;
+    const positionOverride = positionOverrides.get(positionOverrideKey);
+    if (positionOverride) {
+      unusedPositionOverrides.delete(positionOverrideKey);
+    }
+    return positionOverride;
+  };
 
   for (let x = 0; x < schematicWidth; x++) {
     for (let y = 0; y < schematicHeight; y++) {
@@ -242,8 +320,9 @@ export function createBlocksToPlace(
             z,
             blockIdCounter,
             allBlocksToPlace,
-            blockParameters,
             gateMap,
+            dataDrivenBlocks,
+            getPositionOverride,
           })
         ) {
           blockIdCounter++;
@@ -252,9 +331,9 @@ export function createBlocksToPlace(
     }
   }
 
-  if (blockParameters.size > 0) {
+  if (unusedPositionOverrides.size > 0) {
     throw new Error(
-      `Block parameters not used:\n${[...blockParameters.keys()].join('\n')}`,
+      `Block parameters not used:\n${[...unusedPositionOverrides].join('\n')}`,
     );
   }
 

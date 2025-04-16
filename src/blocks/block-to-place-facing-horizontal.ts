@@ -1,11 +1,12 @@
 import assert from 'assert';
 import { Dir, dirCount, mirrorDir, vectorToSingleDir } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import {
   addVectors,
   facingMapping,
-  NULL_VECTOR,
+  invertVector,
   subVectors,
   Vector,
 } from '../components/vector';
@@ -14,7 +15,7 @@ import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-hel
 import { willHaveBlock } from '../helpers/will-have-block';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceFacingHorizontalBase } from './bases/block-to-place-facing-horizontal-base';
-import { nonInvertedFacingHorizontalBlocks } from './block.constants';
+import { DataDrivenBlockFacingHorizontal } from './data-parser/data-driven-block.type';
 
 // A facing horizontal block can be placed:
 // - From above if the turtle is facing the same direction
@@ -22,25 +23,26 @@ import { nonInvertedFacingHorizontalBlocks } from './block.constants';
 // If the turtle is on the side:
 // - The turtle is facing the same direction as the block and there is a block behind or below the target block
 // - The turtle is facing the opposite direction as the block and there is no block behind and no block below the target block
-export class BlockToPlaceFacingHorizontal
-  extends BlockToPlaceFacingHorizontalBase
-  implements BlockToPlace
-{
+export class BlockToPlaceFacingHorizontal extends BlockToPlaceFacingHorizontalBase {
   readonly facing: Vector;
   readonly dependencyDirections: number;
 
-  constructor(id: number, x: number, y: number, z: number, paletteBlock: PaletteBlock) {
-    super(id, x, y, z, paletteBlock);
+  constructor(
+    id: number,
+    pos: Vector,
+    items: InventoryItem[],
+    dataDrivenBlock: DataDrivenBlockFacingHorizontal,
+    paletteBlock: PaletteBlock,
+  ) {
+    super(id, pos, items);
 
-    const blockName = paletteBlock.Name.value;
     const properties = paletteBlock.Properties?.value;
     assert(properties, 'Facing block must have properties');
     const facing = properties.facing?.value;
     assert(facing, 'Facing block must have facing property');
     const facingVector = facingMapping[facing];
-    this.facing = nonInvertedFacingHorizontalBlocks.has(blockName)
-      ? facingVector
-      : subVectors(NULL_VECTOR, facingVector);
+    this.facing =
+      (dataDrivenBlock.inverted ?? true) ? invertVector(facingVector) : facingVector;
 
     const facingDir = vectorToSingleDir(this.facing);
     this.dependencyDirections = Dir.Up | Dir.Down | facingDir | mirrorDir(facingDir);

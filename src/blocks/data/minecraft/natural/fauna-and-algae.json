@@ -49,7 +49,9 @@
     {
       "name": "minecraft:sea_pickle",
       "type": "bottomSupported",
-      "$comment": "TODO: stacking"
+      "item": {
+        "amount": "pickles"
+      }
     }
   ]
 }

@@ -111,6 +111,25 @@ describe('BlockToPlaceWallTorch', () => {
     `,
   });
 
+  // Negative test case for the test above
+  placement({
+    it: 'should not be placeable from above if there are blocks on the sides',
+    layers: `
+      ✖️✖️✖️
+      ✖️✖️✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ✖️👇🟨
+      ✖️🟨✖️
+
+      ✖️✖️✖️
+      ✖️➡️✖️
+      ✖️✖️✖️
+    `,
+    fail: true,
+  });
+
   placement({
     it: 'should not be placeable forwards if there is no block in front',
     layers: `

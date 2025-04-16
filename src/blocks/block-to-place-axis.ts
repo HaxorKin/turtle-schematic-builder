@@ -10,14 +10,17 @@
 
 import assert from 'assert';
 import { Dir, dirCount } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
+import { Vector } from '../components/vector';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceBase } from './bases/block-to-place-base';
+import { DataDrivenBlock } from './data-parser/data-driven-block.type';
 
-export class BlockToPlaceAxisY extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceAxisY extends BlockToPlaceBase {
   get dependencyDirections() {
     return Dir.Up | Dir.Down | Dir.East | Dir.West | Dir.South | Dir.North;
   }
@@ -69,7 +72,7 @@ export class BlockToPlaceAxisY extends BlockToPlaceBase implements BlockToPlace 
   }
 }
 
-export class BlockToPlaceAxisX extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceAxisX extends BlockToPlaceBase {
   get dependencyDirections() {
     return Dir.East | Dir.West;
   }
@@ -109,7 +112,7 @@ export class BlockToPlaceAxisX extends BlockToPlaceBase implements BlockToPlace 
   }
 }
 
-export class BlockToPlaceAxisZ extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceAxisZ extends BlockToPlaceBase {
   get dependencyDirections() {
     return Dir.South | Dir.North;
   }
@@ -151,9 +154,9 @@ export class BlockToPlaceAxisZ extends BlockToPlaceBase implements BlockToPlace 
 
 export function blockToPlaceAxisFactory(
   id: number,
-  x: number,
-  y: number,
-  z: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: DataDrivenBlock,
   paletteBlock: PaletteBlock,
 ) {
   const properties = paletteBlock.Properties?.value;
@@ -162,11 +165,11 @@ export function blockToPlaceAxisFactory(
   assert(axis, 'Axis block must have axis property');
   switch (axis) {
     case 'x':
-      return new BlockToPlaceAxisX(id, x, y, z, paletteBlock);
+      return new BlockToPlaceAxisX(id, pos, items);
     case 'y':
-      return new BlockToPlaceAxisY(id, x, y, z, paletteBlock);
+      return new BlockToPlaceAxisY(id, pos, items);
     case 'z':
-      return new BlockToPlaceAxisZ(id, x, y, z, paletteBlock);
+      return new BlockToPlaceAxisZ(id, pos, items);
     default:
       throw new Error('Invalid axis');
   }

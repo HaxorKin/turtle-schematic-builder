@@ -1,21 +1,14 @@
 import { Reachability } from '../../components/reachability';
 import { TurtleState } from '../../components/turtle-state';
-import { Vector, addVectors, vectorsEqual } from '../../components/vector';
-import { isBlock, isEmpty } from '../../helpers/reachability-helpers';
+import { vectorsEqual } from '../../components/vector';
+import { isEmpty } from '../../helpers/reachability-helpers';
+import { wallSupportedMixin } from '../mixins/block-to-place-wall-supported.mixin';
 import { BlockToPlace } from './block-to-place';
 import { BlockToPlaceBase } from './block-to-place-base';
 
-export abstract class BlockToPlaceWallAttachedBase extends BlockToPlaceBase {
-  abstract readonly facing: Vector;
-
-  override isConditionSatisfied(
-    reachability: Reachability,
-    blocksToPlace?: Map<string, BlockToPlace>,
-  ): boolean;
-  override isConditionSatisfied(reachability: Reachability): boolean {
-    return isBlock(reachability.at(...addVectors(this, this.facing)));
-  }
-
+export abstract class BlockToPlaceWallAttachedBase extends wallSupportedMixin(
+  BlockToPlaceBase,
+) {
   override isPlaceable(
     reachability: Reachability,
     turtle: TurtleState,

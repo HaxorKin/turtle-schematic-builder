@@ -26,7 +26,8 @@
     },
     {
       "name": "minecraft:bell",
-      "type": "todo"
+      "type": "faceAttachedFacing",
+      "wallInverted": false
     },
     {
       "name": "minecraft:cake",
@@ -38,32 +39,83 @@
     {
       "name": "minecraft:candle_cake",
       "type": "bottomSupported",
-      "item": {
-        "name": "minecraft:cake",
-        "stackSize": 1
-      },
-      "$comment": "TODO: candle"
+      "items": [
+        {
+          "name": "minecraft:cake",
+          "stackSize": 1
+        },
+        {
+          "name": "minecraft:candle"
+        },
+        {
+          "name": "minecraft:flint_and_steel",
+          "durability": 64,
+          "amount": "lit",
+          "amountMapping": {
+            "true": 1,
+            "false": 0
+          }
+        }
+      ]
     },
     {
       "name": "minecraft:{color}_candle_cake",
       "type": "bottomSupported",
-      "item": {
-        "name": "minecraft:cake",
-        "stackSize": 1
-      }
+      "items": [
+        {
+          "name": "minecraft:cake",
+          "stackSize": 1
+        },
+        {
+          "name": ["minecraft:(.+)_candle_cake", "minecraft:$1_candle"]
+        },
+        {
+          "name": "minecraft:flint_and_steel",
+          "durability": 64,
+          "amount": "lit",
+          "amountMapping": {
+            "true": 1,
+            "false": 0
+          }
+        }
+      ]
     },
     {
       "name": "minecraft:{'soul_',''}campfire",
       "type": "facingHorizontal",
-      "$comment": "TODO: lit false"
+      "items": [
+        {},
+        {
+          "name": "minecraft:stone_shovel",
+          "durability": 131,
+          "amount": "lit",
+          "amountMapping": {
+            "true": 0,
+            "false": 1
+          }
+        }
+      ],
+      "mightFailHitscan": true
     },
     {
-      "name": "minecraft:{'lava_','powder_snow_','water_',''}cauldron",
+      "name": "minecraft:cauldron",
       "type": "normal",
       "item": {
         "name": "minecraft:cauldron"
-      },
-      "$comment": "TODO: filled"
+      }
+    },
+    {
+      "name": "minecraft:{'lava','powder_snow','water'}_cauldron",
+      "type": "normal",
+      "items": [
+        {
+          "name": "minecraft:cauldron"
+        },
+        {
+          "name": ["minecraft:(.+)_cauldron", "minecraft:$1_bucket"],
+          "stackSize": 1
+        }
+      ]
     },
     {
       "name": "minecraft:chiseled_bookshelf",
@@ -92,48 +144,67 @@
     {
       "name": "minecraft:farmland",
       "type": "normal",
-      "item": {
-        "name": "minecraft:dirt"
-      },
-      "$comment": "TODO: till?"
+      "items": [
+        {
+          "name": "minecraft:dirt"
+        },
+        {
+          "name": "minecraft:stone_hoe",
+          "durability": 131
+        }
+      ]
     },
     {
       "name": "minecraft:flower_pot",
-      "type": "normal",
-      "mightFailHitscan": true
+      "type": "normal"
     },
     {
       "name": "minecraft:potted_{'dandelion','poppy','blue_orchid','allium','azure_bluet','oxeye_daisy','cornflower','lily_of_the_valley','wither_rose','torchflower','red_mushroom','brown_mushroom','fern','dead_bush','cactus','bamboo','azalea_bush','flowering_azalea_bush','mangrove_propagule','open_eyeblossom','closed_eyeblossom'}",
       "type": "normal",
-      "item": {
-        "name": "minecraft:flower_pot"
-      },
-      "mightFailHitscan": true,
-      "$comment": "TODO: plant"
+      "items": [
+        {
+          "name": "minecraft:flower_pot"
+        },
+        {
+          "name": ["minecraft:potted_(.+)", "minecraft:$1"]
+        }
+      ]
     },
     {
       "name": "minecraft:potted_{'red','orange','white','pink'}_tulip",
       "type": "normal",
-      "item": {
-        "name": "minecraft:flower_pot"
-      },
-      "mightFailHitscan": true
+      "items": [
+        {
+          "name": "minecraft:flower_pot"
+        },
+        {
+          "name": ["minecraft:potted_(.+)", "minecraft:$1"]
+        }
+      ]
     },
     {
       "name": "minecraft:potted_{wood}_sapling",
       "type": "normal",
-      "item": {
-        "name": "minecraft:flower_pot"
-      },
-      "mightFailHitscan": true
+      "items": [
+        {
+          "name": "minecraft:flower_pot"
+        },
+        {
+          "name": ["minecraft:potted_(.+)", "minecraft:$1"]
+        }
+      ]
     },
     {
       "name": "minecraft:potted_{'crimson','warped'}_{'fungus','roots'}",
       "type": "normal",
-      "item": {
-        "name": "minecraft:flower_pot"
-      },
-      "mightFailHitscan": true
+      "items": [
+        {
+          "name": "minecraft:flower_pot"
+        },
+        {
+          "name": ["minecraft:potted_(.+)", "minecraft:$1"]
+        }
+      ]
     },
     {
       "name": "minecraft:frosted_ice",
@@ -173,7 +244,8 @@
     },
     {
       "name": "minecraft:ladder",
-      "type": "wallAttached"
+      "type": "wallAttached",
+      "mightFailHitscan": true
     },
     {
       "name": "minecraft:{'lodestone','respawn_anchor'}",
@@ -190,6 +262,7 @@
     {
       "name": "minecraft:scaffolding",
       "type": "bottomSupported",
+      "mightFailHitscan": true,
       "$comment": "TODO: supported by scaffolding to the side"
     },
     {

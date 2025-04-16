@@ -6,21 +6,22 @@ import {
   vectorsToDirs,
   vectorToSingleDir,
 } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import {
   addVectors,
   DOWN,
   facingMapping,
-  NULL_VECTOR,
+  invertVector,
   subVectors,
   UP,
   Vector,
 } from '../components/vector';
 import { classFactory } from '../helpers/class-factory';
 import { isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceWallAttachedBase } from './bases/block-to-place-wall-attached-base';
+import { DataDrivenBlock } from './data-parser/data-driven-block.type';
 
 // A wall attached block can be placed if:
 // There is a block behind the target block
@@ -29,23 +30,26 @@ import { BlockToPlaceWallAttachedBase } from './bases/block-to-place-wall-attach
 // - Or there is space below the target position and the turtle has the same facing
 // - Or There is space on all sides (except above or below, which don't matter)
 
-export class BlockToPlaceWallAttached
-  extends BlockToPlaceWallAttachedBase
-  implements BlockToPlace
-{
+export class BlockToPlaceWallAttached extends BlockToPlaceWallAttachedBase {
   readonly facing: Vector;
   readonly left: Vector;
   readonly right: Vector;
   readonly dependencyDirections: number;
 
-  constructor(id: number, x: number, y: number, z: number, paletteBlock: PaletteBlock) {
-    super(id, x, y, z, paletteBlock);
+  constructor(
+    id: number,
+    pos: Vector,
+    items: InventoryItem[],
+    dataDrivenBlock: DataDrivenBlock,
+    paletteBlock: PaletteBlock,
+  ) {
+    super(id, pos, items);
 
     const properties = paletteBlock.Properties?.value;
     assert(properties, 'Wall attached block must have properties');
     const facing = properties.facing?.value;
     assert(facing, 'Wall attached block must have facing property');
-    this.facing = subVectors(NULL_VECTOR, facingMapping[facing]);
+    this.facing = invertVector(facingMapping[facing]);
 
     const [facingX, , facingZ] = this.facing;
     this.left = [facingZ, 0, -facingX];
@@ -53,7 +57,7 @@ export class BlockToPlaceWallAttached
     this.dependencyDirections = vectorsToDirs(
       UP,
       DOWN,
-      subVectors(NULL_VECTOR, this.facing),
+      invertVector(this.facing),
       this.left,
       this.right,
     );

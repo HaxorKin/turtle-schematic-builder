@@ -1,0 +1,130 @@
+{
+  "$schema": "../../schema.json",
+  "blocks": [
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae,'stone','polished_blackstone'}_button",
+      "type": "faceAttachedFacing",
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:{'waxed_',''}{'exposed_','weathered_','oxidized_',''}copper_bulb",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:crafter",
+      "type": "faceFacing",
+      "ceilingInverted": true
+    },
+    {
+      "name": "minecraft:daylight_detector",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:{'dispenser','dropper'}",
+      "type": "facing"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae,'iron'}_door",
+      "type": "door",
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:{'waxed_',''}{'exposed_','weathered_','oxidized_',''}copper_door",
+      "type": "door"
+    },
+    {
+      "name": "minecraft:{'honey','slime'}_block",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:hopper",
+      "type": "hopper"
+    },
+    {
+      "name": "minecraft:lever",
+      "type": "faceAttachedFacing"
+    },
+    {
+      "name": "minecraft:lightning_rod",
+      "type": "facing"
+    },
+    {
+      "name": "minecraft:{'note_block','redstone_lamp','target'}",
+      "type": "normal"
+    },
+    {
+      "name": "minecraft:observer",
+      "type": "facing",
+      "inverted": false
+    },
+    {
+      "name": "minecraft:{'sticky_',''}piston",
+      "type": "piston"
+    },
+    {
+      "name": "minecraft:{'piston_head','moving_piston'}",
+      "type": "ignored"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae,'stone','polished_blackstone','heavy_weighted','light_weighted'}_pressure_plate",
+      "type": "bottomSupported"
+    },
+    {
+      "name": "minecraft:{'activator_','detector_','powered_',''}rail",
+      "type": "bottomSupported",
+      "$comment": "TODO: shape",
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:redstone_wire",
+      "type": "bottomSupported",
+      "item": {
+        "name": "minecraft:redstone"
+      }
+    },
+    {
+      "name": "minecraft:{'comparator','repeater'}",
+      "type": "bottomSupportedFacing"
+    },
+    {
+      "name": "minecraft:redstone_torch",
+      "type": "groundTorch"
+    },
+    {
+      "name": "minecraft:redstone_wall_torch",
+      "type": "wallTorch"
+    },
+    {
+      "name": "minecraft:trapped_chest",
+      "type": "facingHorizontal"
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae,'iron'}_trapdoor",
+      "type": "stairlike",
+      "inverted": true,
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:{'waxed_',''}{'exposed_','weathered_','oxidized_',''}copper_trapdoor",
+      "type": "stairlike",
+      "inverted": true,
+      "mightFailHitscan": true
+    },
+    {
+      "name": "minecraft:{wood,'bamboo',hyphae}_fence_gate",
+      "type": "facingHorizontal",
+      "inverted": false
+    },
+    {
+      "name": "minecraft:tripwire_hook",
+      "type": "wallAttached"
+    },
+    {
+      "name": "minecraft:tripwire",
+      "type": "normal",
+      "item": {
+        "name": "minecraft:string"
+      }
+    }
+  ]
+}

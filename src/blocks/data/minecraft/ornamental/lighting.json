@@ -4,8 +4,11 @@
     {
       "name": "minecraft:candle",
       "type": "bottomSupported",
+      "item": {
+        "amount": "candles"
+      },
       "mightFailHitscan": true,
-      "$comment": "TODO: Stacking candles and removing supporting block"
+      "$comment": "TODO: removing supporting block"
     },
     {
       "name": "minecraft:{color}_candle",
@@ -43,7 +46,10 @@
     },
     {
       "name": "minecraft:{'soul_',''}wall_torch",
-      "type": "wallTorch"
+      "type": "wallTorch",
+      "item": {
+        "name": ["minecraft:(.*)wall_torch", "minecraft:$1torch"]
+      }
     }
   ]
 }

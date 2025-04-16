@@ -1,46 +1,52 @@
 import assert from 'assert';
 import { Dir, mirrorDir, vectorToSingleDir } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import { TurtleState } from '../components/turtle-state';
 import {
   facingMapping,
-  NULL_VECTOR,
+  invertVector,
   subVectors,
   Vector,
   vectorsEqual,
 } from '../components/vector';
 import { classFactory } from '../helpers/class-factory';
 import { isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace } from './bases/block-to-place';
-import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
-import { nonInvertedRepeaterlikeBlocks } from './block.constants';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
+import { DataDrivenBlockBottomSupportedFacing } from './data-parser/data-driven-block.type';
+import { bottomSupportedMixin } from './mixins/block-to-place-bottom-supported.mixin';
 
 // A bottom supported facing block can be placed:
 // - From above if the turtle is facing the same direction
 // If the turtle is on the side:
 // - The turtle is facing the same direction as the block and there is a block below the target block
 
-export class BlockToPlaceBottomSupportedFacing
-  extends BlockToPlaceBottomSupportedBase
-  implements BlockToPlace
-{
+export class BlockToPlaceBottomSupportedFacing extends bottomSupportedMixin(
+  BlockToPlaceBase,
+) {
   readonly facing: Vector;
   readonly dependencyDirections: number;
 
-  constructor(id: number, x: number, y: number, z: number, paletteBlock: PaletteBlock) {
-    super(id, x, y, z, paletteBlock);
+  constructor(
+    id: number,
+    pos: Vector,
+    items: InventoryItem[],
+    dataDrivenBlock: DataDrivenBlockBottomSupportedFacing,
+    paletteBlock: PaletteBlock,
+  ) {
+    super(id, pos, items);
 
-    const blockName = paletteBlock.Name.value;
     const properties = paletteBlock.Properties?.value;
     assert(properties, 'Facing block must have properties');
     const facing = properties.facing?.value;
     assert(facing, 'Facing block must have facing property');
-    const facingVector = facingMapping[facing];
-    this.facing = nonInvertedRepeaterlikeBlocks.has(blockName)
-      ? facingVector
-      : subVectors(NULL_VECTOR, facingVector);
+    let facingVector = facingMapping[facing];
+    if (dataDrivenBlock.inverted ?? true) {
+      facingVector = invertVector(facingVector);
+    }
 
+    this.facing = facingVector;
     this.dependencyDirections = Dir.Up | mirrorDir(vectorToSingleDir(this.facing));
   }
 

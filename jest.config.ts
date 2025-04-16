@@ -5,5 +5,6 @@ export default {
   preset: 'ts-jest/presets/default-esm',
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { useESM: true }],
+    '^.+\\.json$': ['ts-jest', { useESM: true }],
   },
 } satisfies JestConfigWithTsJest;

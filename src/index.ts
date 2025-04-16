@@ -1,27 +1,32 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { PriorityQueue } from '@js-sdsl/priority-queue';
+import { PriorityQueue } from '@datastructures-js/priority-queue';
 import assert from 'assert';
 import { readFile, writeFile } from 'fs/promises';
 import { parse } from 'prismarine-nbt';
 import { BlockToPlace } from './blocks/bases/block-to-place';
 import { BlockToPlaceLiquid } from './blocks/block-to-place-liquid';
-import { BlockToPlaceParams } from './blocks/block-to-place-params';
+import { DataDrivenBlock } from './blocks/data-parser/data-driven-block.type';
+import { dataDrivenBlockKey } from './blocks/data-parser/data-parser';
+import {
+  dataDrivenBlocks as defaultDataDrivenBlocks,
+  positionOverrides as defaultPositionOverrides,
+} from './blocks/data-parser/parsed-data';
 import { Action } from './components/action';
 import { AstarNode } from './components/astar-node';
 import { GameState, GameStateEnvironment } from './components/game-state';
 import { HeuristicOptimizer } from './components/heuristic-optimizer';
-import { InventoryState } from './components/inventory';
+import { InventoryState } from './components/inventory/inventory';
 import { findPath } from './components/pathfinding';
 import { Reachability } from './components/reachability';
 import { PaddingOptions, Schematic } from './components/schematic';
 import { TurtleState } from './components/turtle-state';
-import { EAST, Vector, WEST } from './components/vector';
+import { EAST, WEST } from './components/vector';
 import { createBlocksToPlace } from './create-blocks-to-place';
 import { createBlockDependencyMap } from './helpers/create-block-dependency-map';
 import { generateSteps, generateStepsWithResupply } from './helpers/generate-steps';
 import { getActionSequenceFromGoalNode } from './helpers/get-action-sequence-from-goal-node';
-import { getStateKey } from './helpers/get-state-key';
+import { getStateKey, StateKey } from './helpers/get-state-key';
 import { minDistanceLogistic } from './helpers/min-distance-logistic';
 import { splitIntoChunks } from './helpers/split-into-chunks';
 
@@ -56,18 +61,13 @@ function calculateHeuristic(gameState: GameState) {
   const blocksRemaining = blocksToPlace.size;
   if (blocksRemaining === 0) return 0;
 
-  // const averageHeight =
-  //   blocksToPlace.values().reduce((acc, pos) => acc + pos[1], 0) /
-  //   (blocksRemaining * reachability.size[1]);
-  const heuristicCost = blocksRemaining; //* averageHeight;
-
   // Get the minimum distance to the closest unplaced block
   let minDistance = Infinity;
-  reachability.floodFillFromTurtle(turtle.position, ([x, y, z, distance]) => {
+  reachability.bfsFromTurtle(turtle.position, ([x, y, z, distance]) => {
     const block = blocksToPlace.get(`${x},${y},${z}`);
     if (
       block?.isConditionSatisfied(reachability, blocksToPlace) &&
-      gameState.inventoryCredit.canAddItem(block.itemName) &&
+      gameState.inventoryCredit.canAddItems(block.items) &&
       !cannotBePlacedBeforeLiquid(block, blocksToPlace)
     ) {
       minDistance = distance;
@@ -77,21 +77,23 @@ function calculateHeuristic(gameState: GameState) {
   });
 
   if (minDistance <= 3 || !Number.isFinite(minDistance)) {
-    return heuristicCost;
+    return blocksRemaining;
   }
 
-  return minDistanceLogistic(minDistance) + heuristicCost;
+  return minDistanceLogistic(minDistance) + blocksRemaining;
 }
 
-const stepAfterNoImprovement = 500;
+const stepAfterNoImprovement = 1000;
 const heuristicMultiplierStep = 0.05;
 const initialHeuristicMultiplier = 0.1;
+const trimThreshold = 0.5;
 
 async function aStarSearch(rootGameState: GameState) {
   const heuristicOptimizer = new HeuristicOptimizer({
     stepAfterNoImprovement,
     heuristicMultiplierStep,
     initialHeuristicMultiplier,
+    trimThreshold,
   });
   const startNode = new AstarNode(
     rootGameState,
@@ -103,16 +105,24 @@ async function aStarSearch(rootGameState: GameState) {
   );
   const openSetBuffer: AstarNode[] = [];
   let openSet = new PriorityQueue<AstarNode>(
-    openSetBuffer,
     (a, b) => a.fCost - b.fCost,
-    false,
+    openSetBuffer,
   );
-  const closedSet = new Map<string, number>();
+  const closedSet = new Map<StateKey, number>();
 
   openSet.push(startNode);
 
-  let currentNode: AstarNode | undefined;
+  let logCounter = 0;
+  const logInterval = 1000;
+  let currentNode: AstarNode | null;
   while ((currentNode = openSet.pop())) {
+    if (++logCounter === logInterval) {
+      logCounter = 0;
+      console.log(
+        `Blocks remaining: ${currentNode.gameState.blocksToPlace.size}, fCost: ${currentNode.fCost.toPrecision(4)}, gCost: ${currentNode.gCost.toPrecision(4)}, hCost: ${currentNode.hCost.toPrecision(4)}`,
+      );
+    }
+
     openSet = await heuristicOptimizer.next(
       currentNode,
       openSetBuffer,
@@ -120,33 +130,36 @@ async function aStarSearch(rootGameState: GameState) {
       closedSet,
     );
 
-    const blocksRemaining = currentNode.gameState.blocksToPlace.size;
+    const { gameState } = currentNode;
+    const blocksRemaining = gameState.blocksToPlace.size;
     // If we've placed all blocks, return the node
     if (blocksRemaining === 0) {
       return currentNode;
     }
 
     // Generate a unique key for the state (could use turtle position and remaining blocks)
-    const stateKey = getStateKey(currentNode.gameState);
+    const stateKey = getStateKey(gameState);
     if (closedSet.has(stateKey)) continue;
     closedSet.set(stateKey, currentNode.totalBlocksPlaced);
 
     // Expand the node and explore its children
     const currentAction = currentNode.action;
-    const possibleActions = currentNode.gameState.getPossibleActions();
+    const possibleActions: (Action | [Action, GameState])[] =
+      gameState.getPossibleActions();
     if (
-      currentAction === 'place' ||
-      currentAction === 'placeDown' ||
-      currentAction === 'placeUp'
+      gameState.inventoryCredit.addableItemsetRatio !== 1 &&
+      (currentAction === 'place' ||
+        currentAction === 'placeDown' ||
+        currentAction === 'placeUp')
     ) {
       possibleActions.push('resupply');
     }
 
     for (const action of possibleActions) {
-      const [nextGameState, actionCost] = currentNode.gameState.executeAction(action);
+      const [nextGameState, actionCost] = gameState.executeAction(action);
       const blocksPlaced =
         currentNode.totalBlocksPlaced +
-        (currentNode.gameState.blocksToPlace.size - nextGameState.blocksToPlace.size);
+        (gameState.blocksToPlace.size - nextGameState.blocksToPlace.size);
       const actionName = typeof action === 'string' ? action : action[0];
 
       // Calculate costs
@@ -179,32 +192,70 @@ const paddingOptions: PaddingOptions = {
   up: true,
 };
 
-const blockParams: [[...Vector, 'w'?], BlockToPlaceParams][] = [
-  [
-    [8, 2, 1],
-    {
-      type: 'liquid',
-      maxMissingSupportBlocks: 0,
-    },
-  ],
-  [
-    [1, 7, 10, 'w'],
-    {
-      type: 'liquid',
-      maxMissingSupportBlocks: 0,
-    },
-  ],
+// const blockParams: [[...Vector, 'w'?], BlockToPlaceParams][] = [
+//   [
+//     [8, 2, 1],
+//     {
+//       type: 'liquid',
+//       maxMissingSupportBlocks: 0,
+//     },
+//   ],
+//   [
+//     [1, 7, 10, 'w'],
+//     {
+//       type: 'liquid',
+//       maxMissingSupportBlocks: 0,
+//     },
+//   ],
+// ];
+
+const water = {
+  name: 'minecraft:water',
+  type: 'liquid',
+  item: {
+    name: 'minecraft:water_bucket',
+    stackSize: 1,
+  },
+  maxMissingSupportBlocks: 0,
+} as const;
+
+const customPositionOverrides: DataDrivenBlock[] = [
+  {
+    ...water,
+    pos: [8, 2, 1],
+    maxMissingSupportBlocks: 0,
+  },
+  {
+    ...water,
+    pos: [1, 7, 10],
+    maxMissingSupportBlocks: 0,
+  },
 ];
 
 const schematic = new Schematic(nbt.parsed, paddingOptions);
-const blockParamsMap = new Map<string, BlockToPlaceParams>(
-  blockParams.map(([[x, y, z, w], params]) => [
-    String(schematic.padVector([x, y, z])) + (w ?? ''),
-    params,
-  ]),
+// const blockParamsMap = new Map<string, BlockToPlaceParams>(
+//   blockParams.map(([[x, y, z, w], params]) => [
+//     String(schematic.padVector([x, y, z])) + (w ?? ''),
+//     params,
+//   ]),
+// );
+
+const positionOverrides = new Map<string, DataDrivenBlock>(
+  [...defaultPositionOverrides.values(), ...customPositionOverrides].map((block) => {
+    assert(block.pos, 'Position override block must have a position');
+    const paddedBlock = {
+      ...block,
+      pos: schematic.padVector(block.pos),
+    };
+    return [dataDrivenBlockKey(paddedBlock), paddedBlock];
+  }),
 );
 
-const [allBlocksToPlace, gateMap] = createBlocksToPlace(schematic, blockParamsMap);
+const [allBlocksToPlace, gateMap] = createBlocksToPlace(
+  schematic,
+  defaultDataDrivenBlocks,
+  positionOverrides,
+);
 const chunks = splitIntoChunks(allBlocksToPlace, Infinity, Infinity);
 console.log(chunks);
 console.log(`Total chunks to process: ${chunks.length}`);
