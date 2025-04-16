@@ -8,11 +8,13 @@
     {
       "name": "minecraft:glow_lichen",
       "type": "todo",
+      "mightFailHitscan": true,
       "$comment": "TODO: can be placed on any face"
     },
     {
       "name": "minecraft:{'brown','red'}_mushroom",
-      "type": "bottomSupported"
+      "type": "bottomSupported",
+      "todo": "Needs darkness?"
     },
     {
       "name": "minecraft:{'brown','red'}_mushroom_block",
@@ -51,8 +53,7 @@
     },
     {
       "name": "minecraft:weeping_vines{'_plant',''}",
-      "type": "todo",
-      "$comment": "TODO: top supported",
+      "type": "topSupported",
       "item": {
         "name": "minecraft:weeping_vines"
       }

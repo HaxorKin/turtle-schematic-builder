@@ -2,16 +2,15 @@ import { Dir } from '../components/dir';
 import { Reachability } from '../components/reachability';
 import { classFactory } from '../helpers/class-factory';
 import { isTurtleReachable } from './../helpers/reachability-helpers';
-import { BlockToPlace } from './bases/block-to-place';
-import { BlockToPlaceBottomSupportedBase } from './bases/block-to-place-bottom-supported-base';
+import { BlockToPlaceBase } from './bases/block-to-place-base';
+import { bottomSupportedMixin } from './mixins/block-to-place-bottom-supported.mixin';
 
 // A bottom supported block can be placed if:
 // - There is space for the turtle on any side of the block other than below
 // - And there is a block below the target block
-export class BlockToPlaceBottomSupported
-  extends BlockToPlaceBottomSupportedBase
-  implements BlockToPlace
-{
+export class BlockToPlaceBottomSupported extends bottomSupportedMixin(
+  BlockToPlaceBase,
+) {
   get dependencyDirections() {
     return Dir.Up | Dir.East | Dir.West | Dir.South | Dir.North;
   }

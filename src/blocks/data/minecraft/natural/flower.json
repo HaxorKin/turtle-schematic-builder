@@ -8,29 +8,27 @@
     {
       "name": "minecraft:{'pink_petals','wildflowers'}",
       "type": "bottomSupportedFacing",
-      "mightFailHitscan": true,
-      "$comment": "TODO: stacking"
+      "item": {
+        "amount": "flower_amount"
+      }
     },
     {
       "name": "minecraft:{'pitcher_plant','rose_bush','sunflower'}",
-      "type": "todo",
-      "$comment": "TODO: two block tall"
+      "type": "bottomSupportedTwoTall"
     },
     {
       "name": "minecraft:pitcher_crop",
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:pitcher_pod"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:torchflower_crop",
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:torchflower_seeds"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:{'red','orange','white','pink'}_tulip",

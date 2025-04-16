@@ -1,15 +1,24 @@
 import assert from 'assert';
-import { Action } from '../components/action';
+import { BlockToPlace } from '../blocks/bases/block-to-place';
+import { isHopper } from '../blocks/block-to-place-hopper';
+import { Action, SimpleAction } from '../components/action';
 import { GameState } from '../components/game-state';
-import { InventoryState } from '../components/inventory';
+import { InventoryState } from '../components/inventory/inventory';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { addVectors, DOWN, UP } from '../components/vector';
 
 function simplifyItemName(itemName: string): string {
   return itemName.replace(/^minecraft:/, '');
 }
 
+function createPlaceInstruction(prefix: ':' | "'" | ',', block: BlockToPlace): string {
+  return block.items
+    .flatMap((item: InventoryItem) => Array(item.amount).fill(prefix + item.name))
+    .join('\n');
+}
+
 function processAction(
-  action: Omit<Action, 'resupply'>,
+  action: Exclude<Action, 'resupply'>,
   currentGameState: GameState,
   hopperCoords: Set<string>,
 ): [newGameState: GameState, luaLine: string] {
@@ -17,25 +26,25 @@ function processAction(
     String(addVectors(currentGameState.turtle.position, DOWN)),
   );
 
-  let luaLine: string;
+  let instruction: string;
   switch (action) {
     case 'forward':
-      luaLine = '+';
+      instruction = '+';
       break;
     case 'back':
-      luaLine = '-';
+      instruction = '-';
       break;
     case 'up':
-      luaLine = '^';
+      instruction = '^';
       break;
     case 'down':
-      luaLine = 'v';
+      instruction = 'v';
       break;
     case 'turnLeft':
-      luaLine = '<';
+      instruction = '<';
       break;
     case 'turnRight':
-      luaLine = '>';
+      instruction = '>';
       break;
     case 'place': {
       const turtleDirection = currentGameState.turtle.direction;
@@ -47,11 +56,11 @@ function processAction(
       const block = currentGameState.blocksToPlace.get(blockKey);
       assert(block, 'Block to place not found');
 
-      if (block.itemName === 'minecraft:hopper') {
+      if (isHopper(block)) {
         hopperCoords.add(blockKey);
       }
 
-      luaLine = ':' + simplifyItemName(block.itemName);
+      instruction = createPlaceInstruction(':', block);
       break;
     }
     case 'placeUp': {
@@ -60,11 +69,11 @@ function processAction(
       const block = currentGameState.blocksToPlace.get(blockKey);
       assert(block, 'Block to place not found');
 
-      if (block.itemName === 'minecraft:hopper') {
+      if (isHopper(block)) {
         hopperCoords.add(blockKey);
       }
 
-      luaLine = "'" + simplifyItemName(block.itemName);
+      instruction = createPlaceInstruction("'", block);
       break;
     }
     case 'placeDown': {
@@ -73,11 +82,11 @@ function processAction(
       const block = currentGameState.blocksToPlace.get(blockKey);
       assert(block, 'Block to place not found');
 
-      if (block.itemName === 'minecraft:hopper') {
+      if (isHopper(block)) {
         hopperCoords.add(blockKey);
       }
 
-      luaLine = ',' + simplifyItemName(block.itemName);
+      instruction = createPlaceInstruction(',', block);
       break;
     }
     default:
@@ -90,12 +99,12 @@ function processAction(
   );
 
   if (wasOnHopper && !isOnHoppper) {
-    luaLine = `${luaLine}\n["redstone","bottom",0]`;
+    instruction = `${instruction}\n["redstone","bottom",0]`;
   } else if (!wasOnHopper && isOnHoppper) {
-    luaLine = `["redstone","bottom",1]\n${luaLine}`;
+    instruction = `["redstone","bottom",1]\n${instruction}`;
   }
 
-  return [currentGameState, luaLine];
+  return [currentGameState, instruction];
 }
 
 function generateSuck(inventory: InventoryState) {
@@ -111,7 +120,7 @@ function generateSuck(inventory: InventoryState) {
 }
 
 export function generateSteps(
-  actionSequence: Action[],
+  actionSequence: SimpleAction[],
   initialGameState: GameState,
   hopperCoords: Set<string>,
 ): [string, GameState] {

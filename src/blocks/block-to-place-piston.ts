@@ -9,11 +9,12 @@
  */
 
 import assert from 'assert';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import {
   DOWN,
   facingMapping,
-  NULL_VECTOR,
+  invertVector,
   subVectors,
   Vector,
   vectorsEqual,
@@ -24,66 +25,48 @@ import {
   BlockToPlaceFacingOther,
 } from './block-to-place-facing';
 import { BlockToPlaceNull } from './block-to-place-null';
-import { nonInvertedFacingBlocks } from './block.constants';
+import { DataDrivenBlock } from './data-parser/data-driven-block.type';
 
-export class BlockToPlacePistonhead extends BlockToPlaceNull implements BlockToPlace {}
+export class BlockToPlacePistonhead extends BlockToPlaceNull {}
 
-export class BlockToPlacePistonDown
-  extends BlockToPlaceFacingDown
-  implements BlockToPlace
-{
+export class BlockToPlacePistonDown extends BlockToPlaceFacingDown {
   readonly extraBlocks: BlockToPlace[];
 
-  constructor(id: number, x: number, y: number, z: number, paletteBlock: PaletteBlock) {
-    super(id, x, y, z, paletteBlock);
+  constructor(id: number, pos: Vector, items: InventoryItem[]) {
+    super(id, pos, items);
 
-    this.extraBlocks = [new BlockToPlacePistonhead(id, x, y + 1, z, paletteBlock)];
+    this.extraBlocks = [new BlockToPlacePistonhead(id, subVectors(pos, DOWN), items)];
   }
 }
 
-export class BlockToPlacePistonOther
-  extends BlockToPlaceFacingOther
-  implements BlockToPlace
-{
+export class BlockToPlacePistonOther extends BlockToPlaceFacingOther {
   readonly extraBlocks: BlockToPlace[];
 
-  constructor(
-    id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
-    facing: Vector,
-  ) {
-    super(id, x, y, z, paletteBlock, facing);
+  constructor(id: number, pos: Vector, items: InventoryItem[], facing: Vector) {
+    super(id, pos, items, facing);
 
     this.extraBlocks = [
-      new BlockToPlacePistonhead(id, ...subVectors(this, facing), paletteBlock),
+      new BlockToPlacePistonhead(id, subVectors(this, facing), items),
     ];
   }
 }
 
 export function blockToPlacePistonFactory(
   id: number,
-  x: number,
-  y: number,
-  z: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: DataDrivenBlock,
   paletteBlock: PaletteBlock,
 ) {
-  const blockName = paletteBlock.Name.value;
   const properties = paletteBlock.Properties?.value;
   assert(properties, 'Piston block must have properties');
   const facing = properties.facing?.value;
   assert(facing, 'Piston block must have facing property');
-  let facingVector = facingMapping[facing];
-  if (!nonInvertedFacingBlocks.has(blockName)) {
-    //TODO
-    facingVector = subVectors(NULL_VECTOR, facingVector);
-  }
+  const facingVector = invertVector(facingMapping[facing]);
 
   if (vectorsEqual(facingVector, DOWN)) {
-    return new BlockToPlacePistonDown(id, x, y, z, paletteBlock);
+    return new BlockToPlacePistonDown(id, pos, items);
   } else {
-    return new BlockToPlacePistonOther(id, x, y, z, paletteBlock, facingVector);
+    return new BlockToPlacePistonOther(id, pos, items, facingVector);
   }
 }

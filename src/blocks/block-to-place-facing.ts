@@ -10,13 +10,14 @@
 
 import assert from 'assert';
 import { Dir, dirCount, mirrorDir, vectorToSingleDir } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import {
   addVectors,
   DOWN,
   facingMapping,
-  NULL_VECTOR,
+  invertVector,
   subVectors,
   Vector,
   vectorsEqual,
@@ -25,9 +26,9 @@ import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-hel
 import { willHaveBlock } from '../helpers/will-have-block';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceBase } from './bases/block-to-place-base';
-import { nonInvertedFacingBlocks } from './block.constants';
+import { DataDrivenBlockFacing } from './data-parser/data-driven-block.type';
 
-export class BlockToPlaceFacingDown extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceFacingDown extends BlockToPlaceBase {
   get dependencyDirections() {
     return Dir.Up | Dir.Down | Dir.East | Dir.West | Dir.South | Dir.North;
   }
@@ -82,18 +83,16 @@ export class BlockToPlaceFacingDown extends BlockToPlaceBase implements BlockToP
   }
 }
 
-export class BlockToPlaceFacingOther extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceFacingOther extends BlockToPlaceBase {
   readonly dependencyDirections: number;
 
   constructor(
     id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
+    pos: Vector,
+    items: InventoryItem[],
     readonly facing: Vector,
   ) {
-    super(id, x, y, z, paletteBlock);
+    super(id, pos, items);
 
     const facingDir = vectorToSingleDir(facing);
     this.dependencyDirections = Dir.Down | facingDir | mirrorDir(facingDir);
@@ -134,24 +133,23 @@ export class BlockToPlaceFacingOther extends BlockToPlaceBase implements BlockTo
 
 export function blockToPlaceFacingFactory(
   id: number,
-  x: number,
-  y: number,
-  z: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: DataDrivenBlockFacing,
   paletteBlock: PaletteBlock,
 ) {
-  const blockName = paletteBlock.Name.value;
   const properties = paletteBlock.Properties?.value;
   assert(properties, 'Facing block must have properties');
   const facing = properties.facing?.value;
   assert(facing, 'Facing block must have facing property');
   let facingVector = facingMapping[facing];
-  if (!nonInvertedFacingBlocks.has(blockName)) {
-    facingVector = subVectors(NULL_VECTOR, facingVector);
+  if (dataDrivenBlock.inverted ?? true) {
+    facingVector = invertVector(facingVector);
   }
 
   if (vectorsEqual(facingVector, DOWN)) {
-    return new BlockToPlaceFacingDown(id, x, y, z, paletteBlock);
+    return new BlockToPlaceFacingDown(id, pos, items);
   } else {
-    return new BlockToPlaceFacingOther(id, x, y, z, paletteBlock, facingVector);
+    return new BlockToPlaceFacingOther(id, pos, items, facingVector);
   }
 }

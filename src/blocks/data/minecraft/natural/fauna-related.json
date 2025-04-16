@@ -23,7 +23,7 @@
       "$comment": "TODO: bottom supported by water"
     },
     {
-      "name": "minecraft:infested_{stone,cobblestone,stone_bricks,mossy_stone_bricks,cracked_stone_bricks,chiseled_stone_bricks,deepslate}",
+      "name": "minecraft:infested_{'stone','cobblestone','stone_bricks','mossy_stone_bricks','cracked_stone_bricks','chiseled_stone_bricks','deepslate'}",
       "type": "normal"
     },
     {
@@ -33,7 +33,9 @@
     {
       "name": "minecraft:turtle_egg",
       "type": "normal",
-      "$comment": "TODO: stacking"
+      "item": {
+        "amount": "eggs"
+      }
     }
   ]
 }

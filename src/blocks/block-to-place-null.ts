@@ -3,7 +3,7 @@ import { TurtleState } from '../components/turtle-state';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceBase } from './bases/block-to-place-base';
 
-export class BlockToPlaceNull extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceNull extends BlockToPlaceBase {
   get dependencyDirections() {
     return undefined;
   }

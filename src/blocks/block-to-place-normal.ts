@@ -1,10 +1,9 @@
 import { Reachability } from '../components/reachability';
 import { classFactory } from '../helpers/class-factory';
 import { isTurtleReachable } from '../helpers/reachability-helpers';
-import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceBase } from './bases/block-to-place-base';
 
-export class BlockToPlaceNormal extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceNormal extends BlockToPlaceBase {
   get dependencyDirections() {
     return undefined;
   }

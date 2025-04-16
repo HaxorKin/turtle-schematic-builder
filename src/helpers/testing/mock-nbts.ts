@@ -1,3 +1,4 @@
+import { Except } from 'type-fest';
 import { PaletteBlock } from '../../components/nbt.validator';
 
 type MappedNbtInput = string | CompoundMappedNbtInput;
@@ -28,7 +29,7 @@ function createNbt(obj: MappedNbtInput) {
 function createBlockNbt(params: { name: string }): { Name: MappedNbt<string> };
 function createBlockNbt<T extends { name: string } & CompoundMappedNbtInput>(
   params: T,
-): { Name: MappedNbt<string>; Properties: MappedNbt<Omit<T, 'name'>> };
+): { Name: MappedNbt<string>; Properties: MappedNbt<Except<T, 'name'>> };
 
 function createBlockNbt<T extends { name: string } & CompoundMappedNbtInput>({
   name,
@@ -36,12 +37,12 @@ function createBlockNbt<T extends { name: string } & CompoundMappedNbtInput>({
 }: T) {
   const block: {
     Name: MappedNbt<string>;
-    Properties?: MappedNbt<Omit<T, 'name'>>;
+    Properties?: MappedNbt<Except<T, 'name'>>;
   } = {
     Name: createNbt(name),
   };
   if (Object.keys(properties).length > 0) {
-    block.Properties = createNbt(properties);
+    block.Properties = createNbt(properties as T as Except<T, 'name'>);
   }
   return block;
 }

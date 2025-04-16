@@ -17,8 +17,7 @@
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:beetroot_seeds"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:big_dripleaf{'_stem',''}",
@@ -37,9 +36,40 @@
       "type": "bottomSupported"
     },
     {
-      "name": "minecraft:{'large_fern','tall_dry_grass','tall_grass'}",
-      "type": "todo",
-      "$comment": "TODO: small version + bonemeal"
+      "name": "minecraft:large_fern",
+      "type": "bottomSupportedTwoTall",
+      "items": [
+        {
+          "name": "minecraft:fern"
+        },
+        {
+          "name": "minecraft:bonemeal"
+        }
+      ]
+    },
+    {
+      "name": "minecraft:tall_dry_grass",
+      "type": "bottomSupportedTwoTall",
+      "items": [
+        {
+          "name": "minecraft:dry_grass"
+        },
+        {
+          "name": "minecraft:bonemeal"
+        }
+      ]
+    },
+    {
+      "name": "minecraft:tall_grass",
+      "type": "bottomSupportedTwoTall",
+      "items": [
+        {
+          "name": "minecraft:grass"
+        },
+        {
+          "name": "minecraft:bonemeal"
+        }
+      ]
     },
     {
       "name": "minecraft:cactus",
@@ -50,21 +80,18 @@
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:carrot"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:cave_vines{'_plant',''}",
-      "type": "todo",
-      "$comment": "TODO: top supported"
+      "type": "topSupported"
     },
     {
       "name": "minecraft:cocoa",
       "type": "wallAttached",
       "item": {
         "name": "minecraft:cocoa_beans"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:creaking_heart",
@@ -72,8 +99,8 @@
     },
     {
       "name": "minecraft:hanging_roots",
-      "type": "todo",
-      "$comment": "TODO: top supported"
+      "type": "topSupported",
+      "mightFailHitscan": true
     },
     {
       "name": "minecraft:leaf_litter",
@@ -111,8 +138,7 @@
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:melon_seeds"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:{'pale_',''}moss_block",
@@ -124,16 +150,14 @@
     },
     {
       "name": "minecraft:pale_hanging_moss",
-      "type": "todo",
-      "$comment": "TODO: top supported"
+      "type": "topSupported"
     },
     {
       "name": "minecraft:potatoes",
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:potato"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:pumpkin",
@@ -148,8 +172,7 @@
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:pumpkin_seeds"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:resin_clump",
@@ -196,8 +219,7 @@
       "type": "bottomSupported",
       "item": {
         "name": "minecraft:wheat_seeds"
-      },
-      "mightFailHitscan": true
+      }
     },
     {
       "name": "minecraft:hay_block",

@@ -1,14 +1,10 @@
-export type Action =
-  | 'forward'
-  | 'back'
-  | 'up'
-  | 'down'
-  | 'turnLeft'
-  | 'turnRight'
-  | 'place'
-  | 'placeUp'
-  | 'placeDown'
-  | 'resupply';
+export type MoveAction = 'forward' | 'back' | 'up' | 'down' | 'turnLeft' | 'turnRight';
+
+export type PlaceAction = 'place' | 'placeUp' | 'placeDown';
+
+export type SimpleAction = MoveAction | PlaceAction;
+
+export type Action = SimpleAction | 'resupply';
 
 export const actionCosts: Record<Action, number> = {
   forward: 2,

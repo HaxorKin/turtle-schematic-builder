@@ -1,19 +1,21 @@
 import assert from 'assert';
 import { Dir, dirCount } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
-import { DOWN, facingMapping, vectorsEqual } from '../components/vector';
+import { DOWN, facingMapping, Vector, vectorsEqual } from '../components/vector';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceBase } from './bases/block-to-place-base';
 import { BlockToPlaceFacingOther } from './block-to-place-facing';
+import { DataDrivenBlock } from './data-parser/data-driven-block.type';
 
 export function blockToPlaceHopperFactory(
   id: number,
-  x: number,
-  y: number,
-  z: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: DataDrivenBlock,
   paletteBlock: PaletteBlock,
 ) {
   const properties = paletteBlock.Properties?.value;
@@ -23,13 +25,13 @@ export function blockToPlaceHopperFactory(
   const facingVector = facingMapping[facing];
 
   if (vectorsEqual(facingVector, DOWN)) {
-    return new BlockToPlaceHopperDown(id, x, y, z, paletteBlock);
+    return new BlockToPlaceHopperDown(id, pos, items);
   } else {
-    return new BlockToPlaceFacingOther(id, x, y, z, paletteBlock, facingVector);
+    return new BlockToPlaceHopperDownOther(id, pos, items, facingVector);
   }
 }
 
-export class BlockToPlaceHopperDown extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceHopperDown extends BlockToPlaceBase {
   get dependencyDirections() {
     return Dir.Up | Dir.Down | Dir.East | Dir.West | Dir.South | Dir.North;
   }
@@ -79,3 +81,11 @@ export class BlockToPlaceHopperDown extends BlockToPlaceBase implements BlockToP
     );
   }
 }
+
+export class BlockToPlaceHopperDownOther extends BlockToPlaceFacingOther {}
+
+export const isHopper = (
+  block: BlockToPlace,
+): block is BlockToPlaceHopperDown | BlockToPlaceHopperDownOther =>
+  block instanceof BlockToPlaceHopperDown ||
+  block instanceof BlockToPlaceHopperDownOther;

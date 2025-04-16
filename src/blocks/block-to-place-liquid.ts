@@ -1,5 +1,5 @@
-import assert from 'assert';
 import { Dir } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import { Schematic } from '../components/schematic';
@@ -10,27 +10,27 @@ import {
   manhattanDistance,
   subVectors,
   UP,
+  Vector,
 } from '../components/vector';
 import { isBlock, isTurtleReachable } from '../helpers/reachability-helpers';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceBase } from './bases/block-to-place-base';
-import { BlockToPlaceParams } from './block-to-place-params';
-import { mightFailHitscan } from './block.constants';
+import { DataDrivenBlockLiquid } from './data-parser/data-driven-block.type';
 
-export class BlockToPlaceLiquid extends BlockToPlaceBase implements BlockToPlace {
+export class BlockToPlaceLiquid extends BlockToPlaceBase {
   protected static readonly supportBlockRange = 7;
   protected static readonly skyCheckRange = 7;
   protected static readonly skyCheckMaxSteps = 14;
+  readonly maxMissingSupportBlocks: number;
 
   constructor(
     id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
-    readonly maxMissingSupportBlocks = 1,
+    pos: Vector,
+    items: InventoryItem[],
+    dataDrivenBlock: DataDrivenBlockLiquid,
   ) {
-    super(id, x, y, z, paletteBlock);
+    super(id, pos, items);
+    this.maxMissingSupportBlocks = dataDrivenBlock.maxMissingSupportBlocks ?? 1;
   }
 
   get dependencyDirections() {
@@ -205,22 +205,16 @@ export class BlockToPlaceLiquid extends BlockToPlaceBase implements BlockToPlace
   }
 }
 
-export class BlockToPlaceWater extends BlockToPlaceLiquid implements BlockToPlace {
-  private readonly mightFailHitscan: boolean;
-
+export class BlockToPlaceWater extends BlockToPlaceLiquid {
   constructor(
     id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
+    pos: Vector,
+    items: InventoryItem[],
+    dataDrivenBlock: DataDrivenBlockLiquid,
     private readonly schematic: Schematic,
-    maxMissingSupportBlocks?: number,
+    private readonly mightFailHitscan = false,
   ) {
-    super(id, x, y, z, paletteBlock, maxMissingSupportBlocks);
-
-    const waterloggedBlock = this.schematic.at(x, y, z);
-    this.mightFailHitscan = mightFailHitscan(waterloggedBlock.Name.value);
+    super(id, pos, items, dataDrivenBlock);
   }
 
   override isPlaceable(
@@ -260,7 +254,7 @@ export class BlockToPlaceWater extends BlockToPlaceLiquid implements BlockToPlac
   }
 }
 
-export class BlockToPlaceLava extends BlockToPlaceLiquid implements BlockToPlace {
+export class BlockToPlaceLava extends BlockToPlaceLiquid {
   override isConditionSatisfied(
     _reachability: Reachability,
     blocksToPlace: Map<string, BlockToPlace>,
@@ -283,35 +277,28 @@ export class BlockToPlaceLava extends BlockToPlaceLiquid implements BlockToPlace
 
 export function blockToPlaceLiquidFactory(
   id: number,
-  x: number,
-  y: number,
-  z: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: DataDrivenBlockLiquid,
   paletteBlock: PaletteBlock,
   schematic: Schematic,
-  params?: BlockToPlaceParams,
+  mightFailHitscan?: boolean,
 ) {
-  let maxMissingSupportBlocks: number | undefined;
-  if (params) {
-    assert(params.type === 'liquid', 'Invalid blockToPlace params');
-    maxMissingSupportBlocks = params.maxMissingSupportBlocks;
-  }
-
   if (!paletteBlock.Properties || paletteBlock.Properties.value.level?.value === '0') {
     const blockName = paletteBlock.Name.value;
     if (blockName === 'minecraft:water') {
       return new BlockToPlaceWater(
         id,
-        x,
-        y,
-        z,
-        paletteBlock,
+        pos,
+        items,
+        dataDrivenBlock,
         schematic,
-        maxMissingSupportBlocks,
+        mightFailHitscan,
       );
     } else if (blockName === 'minecraft:lava') {
-      return new BlockToPlaceLava(id, x, y, z, paletteBlock, maxMissingSupportBlocks);
+      return new BlockToPlaceLava(id, pos, items, dataDrivenBlock);
     } else {
-      return new BlockToPlaceLiquid(id, x, y, z, paletteBlock, maxMissingSupportBlocks);
+      return new BlockToPlaceLiquid(id, pos, items, dataDrivenBlock);
     }
   }
   return undefined;

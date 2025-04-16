@@ -31,8 +31,7 @@
     },
     {
       "name": "minecraft:grindstone",
-      "type": "facingHorizontal",
-      "$comment": "TODO: face + facing"
+      "type": "faceFacing"
     },
     {
       "name": "minecraft:{'lectern','loom','stonecutter'}",
@@ -56,7 +55,8 @@
       "item": {
         "name": ["minecraft:(.+)_wall_sign", "minecraft:$1_sign"],
         "stackSize": 16
-      }
+      },
+      "mightFailHitscan": true
     },
     {
       "name": "minecraft:{wood,'bamboo',hyphae}_hanging_sign",
@@ -69,7 +69,7 @@
         "name": ["minecraft:(.+)_hanging_wall_sign", "minecraft:$1_hanging_sign"],
         "stackSize": 16
       },
-      "$comment": "TODO: facing?"
+      "$comment": "TODO: facing? block below doesn't matter"
     }
   ]
 }

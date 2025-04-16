@@ -32,6 +32,10 @@ const paletteItem = type({
   'Properties?': {
     type: `'compound'`,
     value: {
+      'type?': {
+        type: `'string'`,
+        value: `string`,
+      },
       'axis?': {
         type: `'string'`,
         value: `'x' | 'y' | 'z'`,
@@ -67,6 +71,22 @@ const paletteItem = type({
       'in_wall?': {
         type: `'string'`,
         value: `'true' | 'false'`,
+      },
+      'face?': {
+        type: `'string'`,
+        value: `'floor' | 'wall' | 'ceiling'`,
+      },
+      'orientation?': {
+        type: `'string'`,
+        value: `'up_west' | 'up_east' | 'up_north' | 'up_south' | 'down_west' | 'down_east' | 'down_north' | 'down_south' | 'west_up' | 'east_up' | 'north_up' | 'south_up'`,
+      },
+      'attachment?': {
+        type: `'string'`,
+        value: `'ceiling' | 'floor' | 'single_wall' | 'double_wall'`,
+      },
+      'rotation?': {
+        type: `'string'`,
+        value: `'0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15'`,
       },
     },
   },

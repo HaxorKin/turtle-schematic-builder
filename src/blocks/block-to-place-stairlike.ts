@@ -1,11 +1,12 @@
 import assert from 'assert';
 import { Dir, dirCount, mirrorDir, vectorToSingleDir } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import {
   addVectors,
   facingMapping,
-  NULL_VECTOR,
+  invertVector,
   subVectors,
   Vector,
 } from '../components/vector';
@@ -13,7 +14,7 @@ import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-hel
 import { willHaveBlock } from '../helpers/will-have-block';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceFacingHorizontalBase } from './bases/block-to-place-facing-horizontal-base';
-import { invertedStairlikeBlocks } from './block.constants';
+import { DataDrivenBlockStairlike } from './data-parser/data-driven-block.type';
 
 // A top half block can be placed if:
 // - The turtle is above and there is no block below
@@ -25,19 +26,14 @@ import { invertedStairlikeBlocks } from './block.constants';
 // - And the same direction as the block and there is a block behind or below the target block
 // - Or the opposite direction as the block and there is no block behind or below the target block
 
-export class BlockToPlaceStairlikeTop
-  extends BlockToPlaceFacingHorizontalBase
-  implements BlockToPlace
-{
+export class BlockToPlaceStairlikeTop extends BlockToPlaceFacingHorizontalBase {
   constructor(
     id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
+    pos: Vector,
+    items: InventoryItem[],
     readonly facing: Vector,
   ) {
-    super(id, x, y, z, paletteBlock);
+    super(id, pos, items);
   }
 
   get dependencyDirections() {
@@ -74,21 +70,16 @@ export class BlockToPlaceStairlikeTop
   }
 }
 
-export class BlockToPlaceStairlikeBottom
-  extends BlockToPlaceFacingHorizontalBase
-  implements BlockToPlace
-{
+export class BlockToPlaceStairlikeBottom extends BlockToPlaceFacingHorizontalBase {
   readonly dependencyDirections: number;
 
   constructor(
     id: number,
-    x: number,
-    y: number,
-    z: number,
-    paletteBlock: PaletteBlock,
+    pos: Vector,
+    items: InventoryItem[],
     readonly facing: Vector,
   ) {
-    super(id, x, y, z, paletteBlock);
+    super(id, pos, items);
 
     const facingDir = vectorToSingleDir(facing);
     this.dependencyDirections = Dir.Up | Dir.Down | facingDir | mirrorDir(facingDir);
@@ -150,9 +141,9 @@ export class BlockToPlaceStairlikeBottom
 
 export function blockToPlaceStairlikeFactory(
   id: number,
-  x: number,
-  y: number,
-  z: number,
+  pos: Vector,
+  items: InventoryItem[],
+  dataDrivenBlock: DataDrivenBlockStairlike,
   paletteBlock: PaletteBlock,
 ) {
   const properties = paletteBlock.Properties?.value;
@@ -162,15 +153,15 @@ export function blockToPlaceStairlikeFactory(
   assert(half, 'Stair block must have half property');
   assert(facing, 'Stair block must have facing property');
   let facingVector = facingMapping[facing];
-  facingVector = invertedStairlikeBlocks.has(paletteBlock.Name.value)
-    ? subVectors(NULL_VECTOR, facingVector)
-    : facingVector;
+  if (dataDrivenBlock.inverted) {
+    facingVector = invertVector(facingVector);
+  }
 
   if (half === 'top') {
-    return new BlockToPlaceStairlikeTop(id, x, y, z, paletteBlock, facingVector);
+    return new BlockToPlaceStairlikeTop(id, pos, items, facingVector);
   }
   if (half === 'bottom') {
-    return new BlockToPlaceStairlikeBottom(id, x, y, z, paletteBlock, facingVector);
+    return new BlockToPlaceStairlikeBottom(id, pos, items, facingVector);
   }
   throw new Error(`Invalid half property: ${half}`);
 }

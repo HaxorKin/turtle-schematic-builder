@@ -20,10 +20,10 @@
     {
       "name": "minecraft:snow",
       "type": "bottomSupported",
-      "mightFailHitscan": true,
-      "$comment": "TODO: stacking"
+      "item": {
+        "amount": "layers"
+      }
     },
-
     {
       "name": "minecraft:powder_snow",
       "type": "normal",

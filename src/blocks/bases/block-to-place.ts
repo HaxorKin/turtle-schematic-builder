@@ -1,14 +1,15 @@
+import { InventoryItem } from '../../components/inventory/inventory-item';
 import { Reachability } from '../../components/reachability';
 import { TurtleState } from '../../components/turtle-state';
 import { Vector } from '../../components/vector';
 
-export interface BlockToPlace extends Vector {
+export type BlockToPlace = Vector & {
   readonly id: number;
-  readonly itemName: string;
+  readonly items: InventoryItem[];
   readonly extraBlocks?: BlockToPlace[];
 
   /**
-   * Directions, where placed blocks that can affect reachabilityCount,
+   * Directions, where placed blocks can affect reachabilityCount,
    * undefined if the block can be placed from any direction
    */
   readonly dependencyDirections: number | undefined;
@@ -41,4 +42,4 @@ export interface BlockToPlace extends Vector {
    * @param reachabilityDirections The output of reachabilityDirections
    */
   isDeadlockable(reachabilityDirections: number): boolean;
-}
+};

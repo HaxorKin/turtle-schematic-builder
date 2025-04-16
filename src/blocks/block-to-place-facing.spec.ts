@@ -173,6 +173,21 @@ describe('BlockToPlaceFacing', () => {
   });
 
   placement({
+    it: 'should not be placeable against the block below before it is placed',
+    // Given there is an unplaced block below the target block
+    layers: `
+      ✖️✖️✖️
+      ✖️🟧✖️
+      ✖️✖️✖️
+
+      ✖️✖️✖️
+      ▶️🤚✖️
+      ✖️✖️✖️
+    `,
+    fail: true,
+  });
+
+  placement({
     it: 'should be placeable if the turtle is below the target block',
     // Given the turtle is below the target block
     layers: `

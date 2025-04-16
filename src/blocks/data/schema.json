@@ -14,7 +14,7 @@
         "type": "object",
         "allOf": [
           {
-            "required": ["type"],
+            "required": ["name", "type"],
             "properties": {
               "$comment": {
                 "type": "string",
@@ -37,37 +37,38 @@
                 "type": "string",
                 "description": "Block logic to use"
               },
-              "item": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^[a-z_]+:[a-z_]+$"
-                      },
-                      {
-                        "type": "array",
-                        "minItems": 2,
-                        "maxItems": 2,
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Regex matcher and replacer based on the block name"
-                      }
-                    ]
-                  },
-                  "stackSize": {
-                    "type": "integer",
-                    "minimum": 1
-                  }
-                },
-                "additionalProperties": false
-              },
               "mightFailHitscan": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "The block might fail the hitscan when trying to waterlog it, resulting in the block behind it being waterlogged instead."
               }
             }
+          },
+          {
+            "oneOf": [
+              {
+                "not": {
+                  "required": ["items"]
+                },
+                "properties": {
+                  "item": {
+                    "$ref": "#/$defs/Item"
+                  }
+                }
+              },
+              {
+                "required": ["items"],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/Item"
+                    },
+                    "minItems": 2,
+                    "description": "List of items to use when placing this block, in order"
+                  }
+                }
+              }
+            ]
           },
           {
             "oneOf": [
@@ -101,6 +102,10 @@
                 "properties": {
                   "type": {
                     "const": "stairlike"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -137,6 +142,46 @@
                 }
               },
               {
+                "title": "Face Facing Block",
+                "properties": {
+                  "type": {
+                    "const": "faceFacing"
+                  },
+                  "ceilingInverted": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "floorInverted": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "wallInverted": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              },
+              {
+                "title": "Face Attached Facing Block",
+                "properties": {
+                  "type": {
+                    "const": "faceAttachedFacing"
+                  },
+                  "wallInverted": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              },
+              {
+                "title": "Slab Block",
+                "properties": {
+                  "type": {
+                    "const": "slab"
+                  }
+                }
+              },
+              {
                 "title": "Liquid Block",
                 "properties": {
                   "type": {
@@ -144,7 +189,8 @@
                   },
                   "maxMissingSupportBlocks": {
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 0,
+                    "default": 1
                   }
                 }
               },
@@ -157,6 +203,14 @@
                 }
               },
               {
+                "title": "Bottom Supported Two Tall Block",
+                "properties": {
+                  "type": {
+                    "const": "bottomSupportedTwoTall"
+                  }
+                }
+              },
+              {
                 "title": "Bottom Supported Facing Block",
                 "properties": {
                   "type": {
@@ -165,6 +219,14 @@
                   "inverted": {
                     "type": "boolean",
                     "default": true
+                  }
+                }
+              },
+              {
+                "title": "Top Supported Block",
+                "properties": {
+                  "type": {
+                    "const": "topSupported"
                   }
                 }
               },
@@ -193,6 +255,10 @@
                 "properties": {
                   "type": {
                     "const": "groundSign"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               },
@@ -219,12 +285,128 @@
                     "default": true
                   }
                 }
+              },
+              {
+                "title": "Block with Door Logic",
+                "properties": {
+                  "type": {
+                    "const": "door"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              },
+              {
+                "title": "Block with Hopper Logic",
+                "properties": {
+                  "type": {
+                    "const": "hopper"
+                  },
+                  "inverted": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              },
+              {
+                "title": "Piston Block",
+                "properties": {
+                  "type": {
+                    "const": "piston"
+                  }
+                }
               }
             ]
           }
         ],
         "unevaluatedProperties": false
       }
+    }
+  },
+  "$defs": {
+    "Item": {
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-z_]+:[a-z_]+$"
+                },
+                {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Regex matcher and replacer based on the block name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "oneOf": [
+            {
+              "not": {
+                "required": ["durability"]
+              },
+              "properties": {
+                "stackSize": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 64
+                }
+              }
+            },
+            {
+              "required": ["durability"],
+              "properties": {
+                "durability": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "amount": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            {
+              "required": ["amount"],
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "pattern": "^[a-z_]+$"
+                },
+                "amountMapping": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^[a-z_]+$": {
+                      "type": "integer"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
     }
   }
 }

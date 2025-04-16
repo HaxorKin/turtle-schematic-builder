@@ -7,7 +7,16 @@
     },
     {
       "name": "minecraft:dirt_path",
-      "type": "todo"
+      "type": "normal",
+      "items": [
+        {
+          "name": "minecraft:dirt"
+        },
+        {
+          "name": "minecraft:stone_shovel",
+          "durability": 131
+        }
+      ]
     },
     {
       "name": "minecraft:{wood,'bamboo',hyphae,'nether_brick'}_fence",
@@ -19,71 +28,71 @@
     },
     {
       "name": "minecraft:{wood,'bamboo',hyphae,'bamboo_mosaic','stone','cobblestone','mossy_cobblestone','smooth_stone','stone_brick','mossy_stone_brick'}_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'polished_',''}{'granite','diorite','andesite'}_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'cobbled','polished'}_deepslate_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:deepslate_{'brick','tile'}_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'polished_',''}tuff_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:tuff_brick_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:brick_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:mud_brick_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:resin_brick_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'smooth_','cut_',''}{'red_',''}sandstone_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'prismarine','prismarine_brick','dark_prismarine'}_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'red_',''}nether_brick_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'blackstone','polished_blackstone','polished_blackstone_brick'}_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:end_stone_brick_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:purpur_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'smooth_',''}quartz_slab",
-      "type": "todo"
+      "type": "slab"
     },
     {
       "name": "minecraft:{'waxed_',''}{'exposed_','weathered_','oxidized_',''}cut_copper_slab",
-      "type": "todo"
+      "type": "slab"
     }
   ]
 }

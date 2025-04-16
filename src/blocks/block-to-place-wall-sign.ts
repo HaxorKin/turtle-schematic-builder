@@ -1,13 +1,15 @@
 import assert from 'assert';
 import { Dir, dirCount, mirrorDir, vectorToSingleDir } from '../components/dir';
+import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
-import { facingMapping, NULL_VECTOR, subVectors, Vector } from '../components/vector';
+import { facingMapping, invertVector, subVectors, Vector } from '../components/vector';
 import { classFactory } from '../helpers/class-factory';
 import { isBlock, isEmpty, isTurtleReachable } from '../helpers/reachability-helpers';
 import { willHaveBlock } from '../helpers/will-have-block';
 import { BlockToPlace } from './bases/block-to-place';
 import { BlockToPlaceWallAttachedBase } from './bases/block-to-place-wall-attached-base';
+import { DataDrivenBlock } from './data-parser/data-driven-block.type';
 
 // A wall sign can be placed if:
 // There is a block behind the target block
@@ -19,15 +21,18 @@ import { BlockToPlaceWallAttachedBase } from './bases/block-to-place-wall-attach
 //   - And the turtle is facing the same direction as the target
 //   - Or there is no other block the sign could go on
 
-export class BlockToPlaceWallSign
-  extends BlockToPlaceWallAttachedBase
-  implements BlockToPlace
-{
+export class BlockToPlaceWallSign extends BlockToPlaceWallAttachedBase {
   readonly facing: Vector;
   readonly dependencyDirections: number;
 
-  constructor(id: number, x: number, y: number, z: number, paletteBlock: PaletteBlock) {
-    super(id, x, y, z, paletteBlock);
+  constructor(
+    id: number,
+    pos: Vector,
+    items: InventoryItem[],
+    dataDrivenBlock: DataDrivenBlock,
+    paletteBlock: PaletteBlock,
+  ) {
+    super(id, pos, items);
 
     const properties = paletteBlock.Properties?.value;
     assert(properties, 'Sign block must have properties');
@@ -35,7 +40,7 @@ export class BlockToPlaceWallSign
     assert(facing, 'Sign block must have facing property');
 
     // Wall sign facing directions are inverted
-    this.facing = subVectors(NULL_VECTOR, facingMapping[facing]);
+    this.facing = invertVector(facingMapping[facing]);
 
     this.dependencyDirections =
       Dir.Up | Dir.Down | mirrorDir(vectorToSingleDir(this.facing));
