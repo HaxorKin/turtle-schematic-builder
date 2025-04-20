@@ -10,7 +10,6 @@ export const enum ReachabilityState {
 }
 
 export class Reachability {
-  public readonly blockedMap: Int16Array;
   public readonly originDistance: Int16Array;
 
   constructor(
@@ -20,12 +19,19 @@ export class Reachability {
     blockedMap?: Int16Array,
     originDistance?: Int16Array,
   ) {
-    blockedMap ??= new Int16Array(size[0] * size[1] * size[2]).fill(
-      ReachabilityState.Unreachable,
-    );
-    this.blockedMap = blockedMap;
     if (!originDistance) {
-      this.originDistance = blockedMap.slice();
+      if (!blockedMap) {
+        this.originDistance = new Int16Array(size[0] * size[1] * size[2]).fill(
+          ReachabilityState.Unreachable,
+        );
+      } else {
+        this.originDistance = blockedMap.map((x) =>
+          x === (ReachabilityState.Blocked as number)
+            ? ReachabilityState.Blocked
+            : ReachabilityState.Unreachable,
+        );
+      }
+
       this.floodFill(...origin, 0);
     } else {
       this.originDistance = originDistance;
@@ -38,7 +44,7 @@ export class Reachability {
       props: [x: number, y: number, z: number, distance: number, index: number],
     ) => boolean,
   ) {
-    const { blockedMap } = this;
+    const { originDistance } = this;
     const [width, height, depth] = this.size;
     const widthHeight = width * height;
     const [x, y, z] = turtlePosition;
@@ -53,8 +59,7 @@ export class Reachability {
       const [x, y, z, distance, index] = queueItem;
       if (rachableBlockCallback(queueItem)) return;
 
-      const blockedState = blockedMap[index];
-      if (blockedState === ReachabilityState.Blocked) continue; // Only checked after callback, so waterlogged blocks can be double-placed
+      if (originDistance[index] === ReachabilityState.Blocked) continue; // Only checked after callback, so waterlogged blocks can be double-placed
 
       const neighborDistance = distance + 1;
       if (x + 1 < width) {
@@ -112,16 +117,14 @@ export class Reachability {
     const [width, height] = this.size;
     const widthHeight = width * height;
     const index = x + y * width + z * widthHeight;
-    const newBlockedMap = this.blockedMap.slice();
     const newOriginDistance = originDistance.slice();
     const originalDistance = originDistance[index]!;
-    newBlockedMap[index] = ReachabilityState.Blocked;
     newOriginDistance[index] = ReachabilityState.Blocked;
     let newReachability = new Reachability(
       this.size,
       this.origin,
       this.gateMap,
-      newBlockedMap,
+      undefined,
       newOriginDistance,
     );
 
@@ -132,7 +135,7 @@ export class Reachability {
       for (const block of dependants) {
         const [x, y, z] = block;
         const index = x + y * width + z * widthHeight;
-        if (newBlockedMap[index] !== ReachabilityState.Blocked) {
+        if (newOriginDistance[index] !== ReachabilityState.Blocked) {
           const newGates = block.reachabilityDirections(newReachability, blocksToPlace);
           if (newGates !== undefined && newGates !== gateMap[index]) {
             newGateMap ??= gateMap.slice();
@@ -147,7 +150,7 @@ export class Reachability {
           this.size,
           this.origin,
           newGateMap,
-          newBlockedMap,
+          undefined,
           newOriginDistance,
         );
 
@@ -173,20 +176,18 @@ export class Reachability {
     const { originDistance } = this;
     const [width, height] = this.size;
     const widthHeight = width * height;
-    const newBlockedMap = this.blockedMap.slice();
     const newOriginDistance = this.originDistance.slice();
     let newReachability = new Reachability(
       this.size,
       this.origin,
       this.gateMap,
-      newBlockedMap,
+      undefined,
       newOriginDistance,
     );
 
     for (const pos of positions) {
       const [x, y, z] = pos;
       const index = x + y * width + z * widthHeight;
-      newBlockedMap[index] = ReachabilityState.Blocked;
       newOriginDistance[index] = ReachabilityState.Blocked;
     }
 
@@ -197,7 +198,7 @@ export class Reachability {
       for (const block of dependants) {
         const [x, y, z] = block;
         const index = x + y * width + z * widthHeight;
-        if (newBlockedMap[index] !== ReachabilityState.Blocked) {
+        if (newOriginDistance[index] !== ReachabilityState.Blocked) {
           const newGates = block.reachabilityDirections(newReachability, blocksToPlace);
           if (newGates !== undefined && newGates !== gateMap[index]) {
             newGateMap ??= gateMap.slice();
@@ -212,7 +213,7 @@ export class Reachability {
           this.size,
           this.origin,
           newGateMap,
-          newBlockedMap,
+          undefined,
           newOriginDistance,
         );
 
@@ -500,48 +501,62 @@ export class Reachability {
     const { originDistance, gateMap } = this;
     const [width, height, depth] = this.size;
     const widthHeight = width * height;
-    const queue: [x: number, y: number, z: number, distance: number][] = [
-      [x, y, z, distance],
-    ];
+    const index = x + y * width + z * widthHeight;
 
-    let nextPoint: [number, number, number, number] | undefined;
-    while ((nextPoint = queue.shift())) {
-      const [x, y, z, distance] = nextPoint;
-      const index = x + y * width + z * widthHeight;
+    const queue: [index: number, x: number, y: number, z: number, distance: number][] =
+      [];
+
+    const addPoint = (
+      dir: Dir,
+      index: number,
+      x: number,
+      y: number,
+      z: number,
+      distance: number,
+    ) => {
+      const neighborGates = gateMap[index]!;
+      if ((neighborGates & dir) === 0) {
+        return;
+      }
+
       const currentVisitedDistance = originDistance[index]!;
       if (
         currentVisitedDistance === (ReachabilityState.Blocked as number) ||
         (currentVisitedDistance !== (ReachabilityState.Unreachable as number) &&
           currentVisitedDistance <= distance)
       ) {
-        continue;
+        return;
       }
+
       originDistance[index] = distance;
+      queue.push([index, x, y, z, distance]);
+    };
+
+    addPoint(Dir.All, index, x, y, z, distance);
+
+    let nextPoint: [number, number, number, number, number] | undefined;
+    while ((nextPoint = queue.shift())) {
+      const [index, x, y, z, distance] = nextPoint;
+
       const neighborDistance = distance + 1;
 
       if (x + 1 < width) {
-        const neighborGates = gateMap[index + 1]!;
-        if (neighborGates & Dir.West) queue.push([x + 1, y, z, neighborDistance]);
+        addPoint(Dir.West, index + 1, x + 1, y, z, neighborDistance);
       }
       if (x - 1 >= 0) {
-        const neighborGates = gateMap[index - 1]!;
-        if (neighborGates & Dir.East) queue.push([x - 1, y, z, neighborDistance]);
+        addPoint(Dir.East, index - 1, x - 1, y, z, neighborDistance);
       }
       if (y + 1 < height) {
-        const neighborGates = gateMap[index + width]!;
-        if (neighborGates & Dir.Down) queue.push([x, y + 1, z, neighborDistance]);
+        addPoint(Dir.Down, index + width, x, y + 1, z, neighborDistance);
       }
       if (y - 1 >= 0) {
-        const neighborGates = gateMap[index - width]!;
-        if (neighborGates & Dir.Up) queue.push([x, y - 1, z, neighborDistance]);
+        addPoint(Dir.Up, index - width, x, y - 1, z, neighborDistance);
       }
       if (z + 1 < depth) {
-        const neighborGates = gateMap[index + widthHeight]!;
-        if (neighborGates & Dir.North) queue.push([x, y, z + 1, neighborDistance]);
+        addPoint(Dir.North, index + widthHeight, x, y, z + 1, neighborDistance);
       }
       if (z - 1 >= 0) {
-        const neighborGates = gateMap[index - widthHeight]!;
-        if (neighborGates & Dir.South) queue.push([x, y, z - 1, neighborDistance]);
+        addPoint(Dir.South, index - widthHeight, x, y, z - 1, neighborDistance);
       }
     }
   }
@@ -623,59 +638,60 @@ export class Reachability {
       }
     }
 
-    // BFS to fill in distances for dirty positions
-    while (queue.length > 0) {
-      const [index, x, y, z, distance] = queue.shift()!;
-      const currentDistance = originDistance[index]!;
-      if (currentDistance === (ReachabilityState.Blocked as number)) continue;
+    for (const [index, , , , distance] of queue) {
+      originDistance[index] = distance;
+      dirtyPositions.delete(index);
+    }
 
-      if (!dirtyPositions.delete(index) && distance >= currentDistance) continue;
+    const addPoint = (
+      dir: Dir,
+      index: number,
+      x: number,
+      y: number,
+      z: number,
+      distance: number,
+    ) => {
+      const gates = gateMap[index]!;
+      if ((gates & dir) === 0) {
+        return;
+      }
+      const currentDistance = originDistance[index]!;
+      if (currentDistance === (ReachabilityState.Blocked as number)) {
+        return;
+      }
+
+      if (!dirtyPositions.delete(index) && distance >= currentDistance) {
+        return;
+      }
 
       originDistance[index] = distance;
+      queue.push([index, x, y, z, distance]);
+    };
+
+    // BFS to fill in distances for dirty positions
+    let nextPoint: [number, number, number, number, number] | undefined;
+    while ((nextPoint = queue.shift())) {
+      const [index, x, y, z, distance] = nextPoint;
 
       const neighborDistance = distance + 1;
 
-      // East
       if (x + 1 < width) {
-        const neighborIndex = index + 1;
-        if (gateMap[neighborIndex]! & Dir.West) {
-          queue.push([neighborIndex, x + 1, y, z, neighborDistance]);
-        }
+        addPoint(Dir.West, index + 1, x + 1, y, z, neighborDistance);
       }
-      // West
       if (x - 1 >= 0) {
-        const neighborIndex = index - 1;
-        if (gateMap[neighborIndex]! & Dir.East) {
-          queue.push([neighborIndex, x - 1, y, z, distance + 1]);
-        }
+        addPoint(Dir.East, index - 1, x - 1, y, z, neighborDistance);
       }
-      // Up
       if (y + 1 < height) {
-        const neighborIndex = index + width;
-        if (gateMap[neighborIndex]! & Dir.Down) {
-          queue.push([neighborIndex, x, y + 1, z, distance + 1]);
-        }
+        addPoint(Dir.Down, index + width, x, y + 1, z, neighborDistance);
       }
-      // Down
       if (y - 1 >= 0) {
-        const neighborIndex = index - width;
-        if (gateMap[neighborIndex]! & Dir.Up) {
-          queue.push([neighborIndex, x, y - 1, z, distance + 1]);
-        }
+        addPoint(Dir.Up, index - width, x, y - 1, z, neighborDistance);
       }
-      // South
       if (z + 1 < depth) {
-        const neighborIndex = index + widthHeight;
-        if (gateMap[neighborIndex]! & Dir.North) {
-          queue.push([neighborIndex, x, y, z + 1, distance + 1]);
-        }
+        addPoint(Dir.North, index + widthHeight, x, y, z + 1, neighborDistance);
       }
-      // North
       if (z - 1 >= 0) {
-        const neighborIndex = index - widthHeight;
-        if (gateMap[neighborIndex]! & Dir.South) {
-          queue.push([neighborIndex, x, y, z - 1, distance + 1]);
-        }
+        addPoint(Dir.South, index - widthHeight, x, y, z - 1, neighborDistance);
       }
     }
 

@@ -92,7 +92,10 @@
     },
     {
       "name": "minecraft:redstone_wall_torch",
-      "type": "wallTorch"
+      "type": "wallTorch",
+      "item": {
+        "name": "minecraft:redstone_torch"
+      }
     },
     {
       "name": "minecraft:trapped_chest",

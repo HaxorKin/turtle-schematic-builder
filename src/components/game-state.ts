@@ -85,7 +85,7 @@ export class GameState {
       this.env.supplyPointPosition,
       this.env.supplyPointDirection,
       this.reachability.size,
-      this.reachability.blockedMap,
+      this.reachability.originDistance,
     );
     assert(actions, 'No path to supply point found');
     return actions;
@@ -159,7 +159,7 @@ export class GameState {
 
       const index = x + y * width + z * width * height;
       if (
-        reachability.blockedMap[index] === ReachabilityState.Blocked ||
+        reachability.originDistance[index] === ReachabilityState.Blocked ||
         (block instanceof BlockToPlaceLiquid && !blocksToPlace.has(String(block)))
       ) {
         continue;

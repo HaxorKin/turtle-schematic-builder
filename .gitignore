@@ -147,3 +147,4 @@ build_*.lua
 
 # Profiler
 *.cpuprofile
+*.heapprofile
