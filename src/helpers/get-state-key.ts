@@ -1,16 +1,28 @@
-import xxhash from 'xxhash-wasm';
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+import { vectorToSingleDir } from '../components/dir';
 import { GameState } from '../components/game-state';
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const { h64 } = await xxhash();
-
 export function getStateKey(gameState: GameState) {
-  const parts = [
-    ...gameState.blocksToPlace.keys(),
-    ...gameState.turtle.position,
-    ...gameState.turtle.direction,
-  ];
-  return h64(parts.join('\n'));
+  const {
+    blocksToPlace,
+    turtle: {
+      position: [x, y, z],
+      direction,
+    },
+    reachability: {
+      size: [width, height],
+    },
+  } = gameState;
+
+  let blockIdSum = blocksToPlace.size;
+  for (const block of blocksToPlace.values()) {
+    blockIdSum += block.id;
+  }
+
+  const index = x + y * width + z * width * height;
+  const dir = vectorToSingleDir(direction);
+
+  return BigInt(dir | (index << 3)) | (BigInt(blockIdSum) << 32n);
 }
 
 export type StateKey = ReturnType<typeof getStateKey>;

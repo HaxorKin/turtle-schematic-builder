@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { PriorityQueue } from '@datastructures-js/priority-queue';
+import assert from 'assert';
+import { clamp } from '../helpers/clamp';
 import { StateKey } from '../helpers/get-state-key';
 import { AstarNode } from './astar-node';
 
@@ -9,55 +11,48 @@ export class HeuristicOptimizer {
 
   private readonly stepAfterNoImprovement: number;
   private readonly heuristicMultiplierStep: number;
+  private heuristicMultiplierCounter: number;
   private heuristicMultiplier: number;
-  private readonly trimThreshold: number;
+  private readonly trimSize: number;
   private noImprovementCounter = 0;
   private blocksPlaced = 0;
+  private heuristicMultiplierCounterSum = 0;
 
   constructor({
     stepAfterNoImprovement,
     heuristicMultiplierStep,
-    initialHeuristicMultiplier,
-    trimThreshold,
+    initialHeuristicMultiplierCounter,
+    trimSize,
   }: Readonly<{
     stepAfterNoImprovement: number;
     heuristicMultiplierStep: number;
-    initialHeuristicMultiplier: number;
-    trimThreshold: number;
+    initialHeuristicMultiplierCounter: number;
+    trimSize: number;
   }>) {
+    assert(Number.isSafeInteger(initialHeuristicMultiplierCounter));
+    assert(stepAfterNoImprovement > 0);
+    assert(heuristicMultiplierStep > 0);
+    assert(trimSize > 0);
+
     this.stepAfterNoImprovement = stepAfterNoImprovement;
     this.heuristicMultiplierStep = heuristicMultiplierStep;
-    this.heuristicMultiplier = initialHeuristicMultiplier;
-    this.trimThreshold = trimThreshold;
+    this.heuristicMultiplierCounter = initialHeuristicMultiplierCounter;
+    this.heuristicMultiplier =
+      initialHeuristicMultiplierCounter * heuristicMultiplierStep;
+    this.trimSize = trimSize;
   }
 
   private static trimBuffers(
     openSetBuffer: AstarNode[],
     closedSet: Map<StateKey, number>,
-    threshold: number,
+    trimSize: number,
   ) {
-    if (threshold <= 0) {
-      return;
-    }
+    openSetBuffer.sort(
+      (a, b) => b.totalBlocksPlaced - a.totalBlocksPlaced || a.fCost - b.fCost,
+    );
+    openSetBuffer.length = Math.min(openSetBuffer.length, trimSize);
 
-    // Partition the array so elements with totalBlocksPlaced >= threshold are at the beginning
-    let partitionIndex = 0;
-    for (let i = 0; i < openSetBuffer.length; i++) {
-      const node = openSetBuffer[i]!;
-      if (node.totalBlocksPlaced >= threshold) {
-        if (i !== partitionIndex) {
-          // Swap elements
-          [openSetBuffer[i], openSetBuffer[partitionIndex]] = [
-            openSetBuffer[partitionIndex]!,
-            node,
-          ];
-        }
-        partitionIndex++;
-      }
-    }
-    // Trim the array to contain only elements that meet the threshold
-    openSetBuffer.length = partitionIndex;
-
+    const threshold = openSetBuffer.at(-1)!.totalBlocksPlaced;
     for (const [key, value] of closedSet) {
       if (value < threshold) {
         closedSet.delete(key);
@@ -85,11 +80,18 @@ export class HeuristicOptimizer {
     closedSet: Map<StateKey, number>,
   ) {
     if (currentNode.totalBlocksPlaced > this.blocksPlaced) {
+      this.heuristicMultiplierCounterSum +=
+        this.heuristicMultiplierCounter *
+        (currentNode.totalBlocksPlaced - this.blocksPlaced);
+
       this.blocksPlaced = currentNode.totalBlocksPlaced;
       this.best = currentNode;
-      if (this.heuristicMultiplier > 0) {
-        this.heuristicMultiplier -= this.heuristicMultiplierStep;
-        if (this.heuristicMultiplier < 0) this.heuristicMultiplier = 0;
+      if (this.heuristicMultiplierCounter > 0) {
+        this.heuristicMultiplierCounter = clamp(
+          0,
+          Math.round(this.heuristicMultiplierCounterSum / this.blocksPlaced) - 1,
+          this.heuristicMultiplierCounter - 1,
+        );
 
         HeuristicOptimizer.recalculateFcosts(openSetBuffer, this.heuristicMultiplier);
         openSet = new PriorityQueue<AstarNode>(
@@ -101,14 +103,11 @@ export class HeuristicOptimizer {
     } else {
       this.noImprovementCounter++;
       if (this.noImprovementCounter >= this.stepAfterNoImprovement) {
-        this.heuristicMultiplier += this.heuristicMultiplierStep;
+        this.heuristicMultiplier =
+          ++this.heuristicMultiplierCounter * this.heuristicMultiplierStep;
 
         this.noImprovementCounter = 0;
-        HeuristicOptimizer.trimBuffers(
-          openSetBuffer,
-          closedSet,
-          Math.floor(this.blocksPlaced * this.trimThreshold),
-        );
+        HeuristicOptimizer.trimBuffers(openSetBuffer, closedSet, this.trimSize);
         HeuristicOptimizer.recalculateFcosts(openSetBuffer, this.heuristicMultiplier);
         openSet = new PriorityQueue<AstarNode>(
           (a, b) => a.fCost - b.fCost,

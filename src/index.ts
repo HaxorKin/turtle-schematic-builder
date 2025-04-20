@@ -21,16 +21,17 @@ import { findPath } from './components/pathfinding';
 import { Reachability } from './components/reachability';
 import { PaddingOptions, Schematic } from './components/schematic';
 import { TurtleState } from './components/turtle-state';
-import { EAST, WEST } from './components/vector';
+import { EAST, manhattanDistance, subVectors, Vector, WEST } from './components/vector';
 import { createBlocksToPlace } from './create-blocks-to-place';
+import { boundingBox } from './helpers/bounding-box';
 import { createBlockDependencyMap } from './helpers/create-block-dependency-map';
 import { generateSteps, generateStepsWithResupply } from './helpers/generate-steps';
 import { getActionSequenceFromGoalNode } from './helpers/get-action-sequence-from-goal-node';
 import { getStateKey, StateKey } from './helpers/get-state-key';
-import { minDistanceLogistic } from './helpers/min-distance-logistic';
 import { splitIntoChunks } from './helpers/split-into-chunks';
 
-const nbt = await parse(await readFile('brokemoss1_1.nbt'));
+// const nbt = await parse(await readFile('brokemoss1_1.nbt'));
+const nbt = await parse(await readFile('malkah.nbt'));
 
 //HACK
 function cannotBePlacedBeforeLiquid(
@@ -55,52 +56,129 @@ function cannotBePlacedBeforeLiquid(
   // return false;
 }
 
-// Calculate the heuristic once and store it
-function calculateHeuristic(gameState: GameState) {
-  const { reachability, blocksToPlace, turtle } = gameState;
-  const blocksRemaining = blocksToPlace.size;
-  if (blocksRemaining === 0) return 0;
+function getResuppliesUpperBound(rootGameState: GameState) {
+  // TODO: Waterlogged blocks get added later
 
-  // Get the minimum distance to the closest unplaced block
-  let minDistance = Infinity;
-  reachability.bfsFromTurtle(turtle.position, ([x, y, z, distance]) => {
-    const block = blocksToPlace.get(`${x},${y},${z}`);
-    if (
-      block?.isConditionSatisfied(reachability, blocksToPlace) &&
-      gameState.inventoryCredit.canAddItems(block.items) &&
-      !cannotBePlacedBeforeLiquid(block, blocksToPlace)
-    ) {
-      minDistance = distance;
-      return true;
+  const blocks = [...rootGameState.blocksToPlace.values()];
+  let inventory = rootGameState.inventoryCredit;
+  let block: BlockToPlace | undefined;
+  let resupplies = 0;
+  while ((block = blocks.pop())) {
+    if (inventory.addableItemsetRatio < 1) {
+      inventory = inventory.clear();
+      resupplies++;
     }
-    return false;
-  });
 
-  if (minDistance <= 3 || !Number.isFinite(minDistance)) {
-    return blocksRemaining;
+    inventory = inventory.addItems(
+      block.items,
+      blocks.map((x) => x.items),
+    );
   }
 
-  return minDistanceLogistic(minDistance) + blocksRemaining;
+  return resupplies;
+}
+
+function heuristicFuncFactory(rootGameState: GameState) {
+  const [boundingBoxMin, boundingBoxMax] = boundingBox(
+    rootGameState.blocksToPlace.values(),
+  );
+  const boundingBoxSize = subVectors(boundingBoxMax, boundingBoxMin);
+  // // const boundingBoxSize: Vector = [...rootGameState.reachability.size];
+  const [tspA, tspB, tspC] = boundingBoxSize.sort((a, b) => a - b);
+  const boundingDiagonal = manhattanDistance(boundingBoxMin, boundingBoxMax);
+  // const boundingDiagonalX2 = boundingDiagonal * 2;
+
+  const maxResupplies = getResuppliesUpperBound(rootGameState);
+  const center: Vector = [
+    (boundingBoxMin[0] + boundingBoxMax[0]) / 2,
+    (boundingBoxMin[1] + boundingBoxMax[1]) / 2,
+    (boundingBoxMin[2] + boundingBoxMax[2]) / 2,
+  ];
+  const resupplyDistance =
+    manhattanDistance(rootGameState.env.supplyPointPosition, center) * 2;
+
+  return function calculateHeuristic(gameState: GameState) {
+    const { reachability, blocksToPlace, turtle } = gameState;
+    const blocksRemaining = blocksToPlace.size;
+    if (blocksRemaining === 0) return 0;
+
+    const blocksPerSide = Math.cbrt(blocksRemaining);
+    // Calculate a traveling salesman problem manhattan distance upper bound
+    // traveling along one row: tspA
+    // traveling along one layer: (tspA * blocksPerSide + tspB)
+    // traveling along all layers: layer * blocksPerSide + tspC
+    const tspUpperBound = (tspA * blocksPerSide + tspB) * blocksPerSide + tspC;
+
+    const remainingResupplies = Math.max(
+      maxResupplies - gameState.inventoryCredit.clearCount,
+      0,
+    );
+    const futureResuppliesCost = remainingResupplies * resupplyDistance;
+
+    // Get the minimum distance to the closest unplaced block
+    let minDistance = Infinity;
+
+    const { position } = turtle;
+    for (const block of blocksToPlace.values()) {
+      const distance = manhattanDistance(position, block);
+      if (distance < minDistance) {
+        minDistance = distance;
+      }
+    }
+
+    minDistance *= 2; // TODO: measure?
+
+    if (minDistance <= 20) {
+      reachability.bfsFromTurtle(turtle.position, ([x, y, z, distance]) => {
+        if (distance > 10) {
+          minDistance = 20;
+          return true;
+        }
+
+        const block = blocksToPlace.get(`${x},${y},${z}`);
+        if (
+          block?.isConditionSatisfied(reachability, blocksToPlace) &&
+          gameState.inventoryCredit.canAddItems(block.items) &&
+          !cannotBePlacedBeforeLiquid(block, blocksToPlace)
+        ) {
+          minDistance = distance;
+          return true;
+        }
+        return false;
+      });
+    }
+
+    if (minDistance <= 3) {
+      return tspUpperBound + futureResuppliesCost;
+      // return blocksRemaining + remainingResupplies;
+    }
+
+    return tspUpperBound + futureResuppliesCost + minDistance / boundingDiagonal;
+    // return blocksRemaining + remainingResupplies + minDistance / boundingDiagonalX2;
+  };
 }
 
 const stepAfterNoImprovement = 1000;
 const heuristicMultiplierStep = 0.05;
-const initialHeuristicMultiplier = 0.1;
-const trimThreshold = 0.5;
+const initialHeuristicMultiplierCounter = 20;
+const trimSize = 10_000;
 
-async function aStarSearch(rootGameState: GameState) {
+async function aStarSearch(
+  rootGameState: GameState,
+  calculateHeuristic: (gameState: GameState) => number,
+) {
   const heuristicOptimizer = new HeuristicOptimizer({
     stepAfterNoImprovement,
     heuristicMultiplierStep,
-    initialHeuristicMultiplier,
-    trimThreshold,
+    initialHeuristicMultiplierCounter,
+    trimSize,
   });
   const startNode = new AstarNode(
     rootGameState,
     undefined,
     undefined,
     0,
-    calculateHeuristic(rootGameState),
+    heuristicOptimizer.fCost(0, calculateHeuristic(rootGameState)),
     0,
   );
   const openSetBuffer: AstarNode[] = [];
@@ -119,7 +197,7 @@ async function aStarSearch(rootGameState: GameState) {
     if (++logCounter === logInterval) {
       logCounter = 0;
       console.log(
-        `Blocks remaining: ${currentNode.gameState.blocksToPlace.size}, fCost: ${currentNode.fCost.toPrecision(4)}, gCost: ${currentNode.gCost.toPrecision(4)}, hCost: ${currentNode.hCost.toPrecision(4)}`,
+        `Blocks remaining: ${currentNode.gameState.blocksToPlace.size}, fCost: ${currentNode.fCost.toPrecision(4)}, gCost: ${currentNode.gCost.toPrecision(4)}, hCost: ${currentNode.hCost.toPrecision(4)}, inv: ${currentNode.gameState.inventoryCredit.addableItemsetRatio.toPrecision(4)}`,
       );
     }
 
@@ -136,11 +214,6 @@ async function aStarSearch(rootGameState: GameState) {
     if (blocksRemaining === 0) {
       return currentNode;
     }
-
-    // Generate a unique key for the state (could use turtle position and remaining blocks)
-    const stateKey = getStateKey(gameState);
-    if (closedSet.has(stateKey)) continue;
-    closedSet.set(stateKey, currentNode.totalBlocksPlaced);
 
     // Expand the node and explore its children
     const currentAction = currentNode.action;
@@ -160,6 +233,12 @@ async function aStarSearch(rootGameState: GameState) {
       const blocksPlaced =
         currentNode.totalBlocksPlaced +
         (gameState.blocksToPlace.size - nextGameState.blocksToPlace.size);
+
+      // Generate a unique key for the state (could use turtle position and remaining blocks)
+      const stateKey = getStateKey(nextGameState);
+      if (closedSet.has(stateKey)) continue;
+      closedSet.set(stateKey, blocksPlaced);
+
       const actionName = typeof action === 'string' ? action : action[0];
 
       // Calculate costs
@@ -185,29 +264,12 @@ async function aStarSearch(rootGameState: GameState) {
 }
 
 const paddingOptions: PaddingOptions = {
-  north: true,
-  east: true,
-  south: true,
-  west: true,
-  up: true,
+  north: false,
+  east: false,
+  south: false,
+  west: false,
+  up: false,
 };
-
-// const blockParams: [[...Vector, 'w'?], BlockToPlaceParams][] = [
-//   [
-//     [8, 2, 1],
-//     {
-//       type: 'liquid',
-//       maxMissingSupportBlocks: 0,
-//     },
-//   ],
-//   [
-//     [1, 7, 10, 'w'],
-//     {
-//       type: 'liquid',
-//       maxMissingSupportBlocks: 0,
-//     },
-//   ],
-// ];
 
 const water = {
   name: 'minecraft:water',
@@ -220,16 +282,16 @@ const water = {
 } as const;
 
 const customPositionOverrides: DataDrivenBlock[] = [
-  {
-    ...water,
-    pos: [8, 2, 1],
-    maxMissingSupportBlocks: 0,
-  },
-  {
-    ...water,
-    pos: [1, 7, 10],
-    maxMissingSupportBlocks: 0,
-  },
+  // {
+  //   ...water,
+  //   pos: [8, 2, 1],
+  //   maxMissingSupportBlocks: 0,
+  // },
+  // {
+  //   ...water,
+  //   pos: [1, 7, 10],
+  //   maxMissingSupportBlocks: 0,
+  // },
 ];
 
 const schematic = new Schematic(nbt.parsed, paddingOptions);
@@ -251,22 +313,27 @@ const positionOverrides = new Map<string, DataDrivenBlock>(
   }),
 );
 
+console.log('Creating blocks to place...');
 const [allBlocksToPlace, gateMap] = createBlocksToPlace(
   schematic,
   defaultDataDrivenBlocks,
   positionOverrides,
 );
-const chunks = splitIntoChunks(allBlocksToPlace, Infinity, Infinity);
-console.log(chunks);
+console.log('Blocks to place created');
+const chunks = splitIntoChunks(allBlocksToPlace, Infinity, 3);
 console.log(`Total chunks to process: ${chunks.length}`);
 
 // Turtle starts from bottom left corner facing east
 const initialTurtle = new TurtleState([0, 0, 0], EAST);
+const supplyPointPosition: Vector = [0, 0, 0];
+const supplyPointDirection = WEST; // Behind the turtle at the start
+const blockDependencyMap = createBlockDependencyMap(allBlocksToPlace);
 const gameStateEnv: GameStateEnvironment = {
-  supplyPointPosition: [0, 0, 0],
-  supplyPointDirection: WEST, // Behind the turtle at the start
-  blockDependencyMap: createBlockDependencyMap(allBlocksToPlace),
+  supplyPointPosition,
+  supplyPointDirection,
+  blockDependencyMap,
 };
+
 const initialReachability = new Reachability(
   schematic.size,
   initialTurtle.position,
@@ -274,13 +341,7 @@ const initialReachability = new Reachability(
 );
 const initialInventory = new InventoryState();
 
-let currentGameState = new GameState(
-  gameStateEnv,
-  chunks[0]!,
-  initialTurtle,
-  initialReachability,
-  initialInventory,
-);
+let currentGameState: GameState | undefined;
 
 const fullActionSequence: Action[] = [];
 const startTime = Date.now();
@@ -289,21 +350,23 @@ for (let i = 0; i < chunks.length; i++) {
     `Processing chunk ${i + 1}/${chunks.length} with ${chunks[i]!.size} blocks`,
   );
 
+  const blocksToPlace = chunks[i]!;
   const chunkGameState = new GameState(
     gameStateEnv,
-    chunks[i]!,
-    currentGameState.turtle,
-    currentGameState.reachability,
-    currentGameState.inventoryCredit,
+    blocksToPlace,
+    currentGameState?.turtle ?? initialTurtle,
+    currentGameState?.reachability ?? initialReachability,
+    currentGameState?.inventoryCredit.resetPossibleItems() ?? initialInventory,
   );
 
-  for (const block of currentGameState.blocksToPlace.values()) {
+  for (const block of blocksToPlace.values()) {
     if (!block.isReachable(chunkGameState.reachability)) {
       throw new Error(`Block ${block} is not satisfiable`);
     }
   }
 
-  const goalNode = await aStarSearch(chunkGameState);
+  const heuristicFunc = heuristicFuncFactory(chunkGameState);
+  const goalNode = await aStarSearch(chunkGameState, heuristicFunc);
 
   if (!goalNode) {
     throw new Error(`No solution found for chunk ${i + 1}`);
@@ -497,11 +560,13 @@ function refuel(fuelRequirement)
   end
 end
 
-function resupply(items)
-  for key, value in pairs(items) do
-    if not key:find(":") then
+function resupply(itemCounts)
+  local items = {}
+  for key, value in pairs(itemCounts) do
+    if key:find(":") then
+      items[key] = value
+    else
       items["minecraft:" .. key] = value
-      items[key] = nil
     end
   end
 
@@ -682,7 +747,7 @@ const pathToOrigin = findPath(
   initialTurtle.position,
   initialTurtle.direction,
   schematic.size,
-  gameState.reachability.blockedMap,
+  gameState.reachability.originDistance,
 );
 assert(pathToOrigin, 'No path to origin found');
 const [luaScriptToOrigin] = generateSteps(pathToOrigin, gameState, hopperCoords);

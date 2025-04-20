@@ -13,6 +13,7 @@ export class InventoryState {
     private readonly slots: readonly InventorySlot[] = [],
     possibleItems?: Iterable<InventoryItem[]>,
     maxItemsetSize?: number,
+    readonly clearCount = 0,
   ) {
     const remainingSlots = slotLimit - slots.length;
     if (maxItemsetSize !== undefined && remainingSlots >= maxItemsetSize) {
@@ -151,7 +152,17 @@ export class InventoryState {
   }
 
   clear(): InventoryState {
-    return new InventoryState(this.slotLimit);
+    return new InventoryState(
+      this.slotLimit,
+      undefined,
+      undefined,
+      undefined,
+      this.clearCount + 1,
+    );
+  }
+
+  resetPossibleItems(): InventoryState {
+    return new InventoryState(this.slotLimit, this.slots);
   }
 
   toSlots(): [itemName: string, count: number][] {
