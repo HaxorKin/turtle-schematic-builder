@@ -13,7 +13,7 @@ export const actionCosts: Record<Action, number> = {
   down: 2,
   turnLeft: 1,
   turnRight: 1,
-  resupply: 6,
+  resupply: 3, // Multiplier for the distance
 
   // Placeholders
   place: 0,

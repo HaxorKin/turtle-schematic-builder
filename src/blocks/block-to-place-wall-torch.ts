@@ -1,21 +1,13 @@
 import assert from 'assert';
-import {
-  Dir,
-  dirCount,
-  mirrorDir,
-  vectorsToDirs,
-  vectorToSingleDir,
-} from '../components/dir';
+import { Dir, dirCount, mirrorDir, vectorToSingleDir } from '../components/dir';
 import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import {
   addVectors,
-  DOWN,
   facingMapping,
   invertVector,
   subVectors,
-  UP,
   Vector,
 } from '../components/vector';
 import { classFactory } from '../helpers/class-factory';
@@ -34,7 +26,6 @@ export class BlockToPlaceWallTorch extends BlockToPlaceWallAttachedBase {
   readonly facing: Vector;
   readonly left: Vector;
   readonly right: Vector;
-  readonly dependencyDirections: number;
 
   constructor(
     id: number,
@@ -56,13 +47,10 @@ export class BlockToPlaceWallTorch extends BlockToPlaceWallAttachedBase {
     const [facingX, , facingZ] = this.facing;
     this.left = [facingZ, 0, -facingX];
     this.right = [-facingZ, 0, facingX];
-    this.dependencyDirections = vectorsToDirs(
-      UP,
-      DOWN,
-      invertVector(this.facing),
-      this.left,
-      this.right,
-    );
+  }
+
+  get dependencyDirections() {
+    return Dir.All;
   }
 
   reachabilityDirections(reachability: Reachability): number {

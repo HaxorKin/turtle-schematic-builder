@@ -15,24 +15,16 @@
  */
 
 import assert from 'assert';
-import {
-  Dir,
-  dirCount,
-  mirrorDir,
-  vectorsToDirs,
-  vectorToSingleDir,
-} from '../components/dir';
+import { Dir, dirCount, mirrorDir, vectorToSingleDir } from '../components/dir';
 import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
 import { TurtleState } from '../components/turtle-state';
 import {
   addVectors,
-  DOWN,
   facingMapping,
   invertVector,
   subVectors,
-  UP,
   Vector,
   vectorsEqual,
 } from '../components/vector';
@@ -61,7 +53,7 @@ export class BlockToPlaceFaceAttachedFacingFloor extends bottomSupportedMixin(
 
     const facingDir = vectorToSingleDir(facing);
     const behindDir = mirrorDir(facingDir);
-    this.dependencyDirections = Dir.Up | facingDir | behindDir;
+    this.dependencyDirections = Dir.Up | Dir.Down | facingDir | behindDir;
     this.behindDir = behindDir;
   }
 
@@ -150,7 +142,6 @@ export class BlockToPlaceFaceAttachedFacingCeiling extends topSupportedMixin(
 export class BlockToPlaceFaceAttachedFacingWall extends BlockToPlaceWallAttachedBase {
   readonly left: Vector;
   readonly right: Vector;
-  readonly dependencyDirections: number;
 
   constructor(
     id: number,
@@ -163,13 +154,10 @@ export class BlockToPlaceFaceAttachedFacingWall extends BlockToPlaceWallAttached
     const [facingX, , facingZ] = facing;
     this.left = [facingZ, 0, -facingX];
     this.right = [-facingZ, 0, facingX];
-    this.dependencyDirections = vectorsToDirs(
-      UP,
-      DOWN,
-      invertVector(this.facing),
-      this.left,
-      this.right,
-    );
+  }
+
+  get dependencyDirections() {
+    return Dir.All;
   }
 
   reachabilityDirections(reachability: Reachability): number {

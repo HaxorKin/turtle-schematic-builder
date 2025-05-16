@@ -33,15 +33,15 @@
     "tsx": "^4.19.3",
     "type-fest": "^4.38.0",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.28.0"
+    "typescript-eslint": "^8.28.0",
+    "lua-ls-cc-tweaked": "nvim-computercraft/lua-ls-cc-tweaked"
   },
   "dependencies": {
     "@datastructures-js/priority-queue": "^6.3.2",
     "arktype": "2.1.15",
     "deep-equal": "^2.2.3",
     "minecraft-data": "^3.85.0",
-    "prismarine-nbt": "^2.7.0",
-    "xxhash-wasm": "^1.1.0"
+    "prismarine-nbt": "^2.7.0"
   },
   "type": "module"
 }

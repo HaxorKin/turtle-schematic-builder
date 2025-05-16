@@ -68,7 +68,123 @@ export default tseslint.config(
       '@typescript-eslint/no-unnecessary-type-parameters': 'warn', // This rule has false positives
       '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
       '@typescript-eslint/max-params': ['warn', { max: 7 }],
-      '@typescript-eslint/member-ordering': 'warn',
+      '@typescript-eslint/member-ordering': [
+        'warn',
+        {
+          default: {
+            memberTypes: [
+              // Index signature
+              'signature',
+              'call-signature',
+
+              // Fields
+              'public-static-field',
+              'protected-static-field',
+              'private-static-field',
+              '#private-static-field',
+
+              'public-decorated-field',
+              'protected-decorated-field',
+              'private-decorated-field',
+
+              'public-instance-field',
+              'protected-instance-field',
+              'private-instance-field',
+              '#private-instance-field',
+
+              'public-abstract-field',
+              'protected-abstract-field',
+
+              'public-field',
+              'protected-field',
+              'private-field',
+              '#private-field',
+
+              'static-field',
+              'instance-field',
+              'abstract-field',
+
+              'decorated-field',
+
+              'field',
+
+              // Static initialization
+              'static-initialization',
+
+              // Constructors
+              'public-constructor',
+              'protected-constructor',
+              'private-constructor',
+
+              'constructor',
+
+              // Accessors
+              'public-static-accessor',
+              'protected-static-accessor',
+              'private-static-accessor',
+              '#private-static-accessor',
+
+              'public-decorated-accessor',
+              'protected-decorated-accessor',
+              'private-decorated-accessor',
+
+              'public-instance-accessor',
+              'protected-instance-accessor',
+              'private-instance-accessor',
+              '#private-instance-accessor',
+
+              'public-abstract-accessor',
+              'protected-abstract-accessor',
+
+              'public-accessor',
+              'protected-accessor',
+              'private-accessor',
+              '#private-accessor',
+
+              'static-accessor',
+              'instance-accessor',
+              'abstract-accessor',
+
+              'decorated-accessor',
+
+              'accessor',
+
+              ['get', 'set'],
+
+              // Methods
+              'public-static-method',
+              'protected-static-method',
+              'private-static-method',
+              '#private-static-method',
+
+              'public-decorated-method',
+              'protected-decorated-method',
+              'private-decorated-method',
+
+              'public-instance-method',
+              'protected-instance-method',
+              'private-instance-method',
+              '#private-instance-method',
+
+              'public-abstract-method',
+              'protected-abstract-method',
+
+              'public-method',
+              'protected-method',
+              'private-method',
+              '#private-method',
+
+              'static-method',
+              'instance-method',
+              'abstract-method',
+
+              'decorated-method',
+
+              'method',
+            ],
+          },
+        },
+      ],
       '@typescript-eslint/no-loop-func': 'warn',
       '@typescript-eslint/no-magic-numbers': [
         'warn',

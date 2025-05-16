@@ -36,7 +36,7 @@ export class BlockToPlaceBottomSupportedTwoTall extends bottomSupportedMixin(
   }
 
   get dependencyDirections() {
-    return Dir.East | Dir.West | Dir.South | Dir.North;
+    return Dir.Down | Dir.East | Dir.West | Dir.South | Dir.North;
   }
 
   reachabilityDirections(reachability: Reachability): number {

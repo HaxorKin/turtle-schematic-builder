@@ -4,7 +4,7 @@ import { GameState } from '../components/game-state';
 
 export function getStateKey(gameState: GameState) {
   const {
-    blocksToPlace,
+    blocksToPlaceHash,
     turtle: {
       position: [x, y, z],
       direction,
@@ -14,15 +14,10 @@ export function getStateKey(gameState: GameState) {
     },
   } = gameState;
 
-  let blockIdSum = blocksToPlace.size;
-  for (const block of blocksToPlace.values()) {
-    blockIdSum += block.id;
-  }
-
   const index = x + y * width + z * width * height;
   const dir = vectorToSingleDir(direction);
 
-  return BigInt(dir | (index << 3)) | (BigInt(blockIdSum) << 32n);
+  return BigInt(dir | (index << 6)) | (BigInt(blocksToPlaceHash) << 32n);
 }
 
 export type StateKey = ReturnType<typeof getStateKey>;

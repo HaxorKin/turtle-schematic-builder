@@ -148,7 +148,13 @@ export class InventoryState {
       }
     }
 
-    return new InventoryState(this.slotLimit, slots, possibleItems, maxItemsetSize);
+    return new InventoryState(
+      this.slotLimit,
+      slots,
+      possibleItems,
+      maxItemsetSize,
+      this.clearCount,
+    );
   }
 
   clear(): InventoryState {

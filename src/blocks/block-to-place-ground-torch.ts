@@ -11,7 +11,7 @@ import { bottomSupportedMixin } from './mixins/block-to-place-bottom-supported.m
 // - Or there is space for the turtle above the block
 export class BlockToPlaceGroundTorch extends bottomSupportedMixin(BlockToPlaceBase) {
   get dependencyDirections() {
-    return Dir.Up | Dir.East | Dir.West | Dir.South | Dir.North;
+    return Dir.All;
   }
 
   reachabilityDirections(reachability: Reachability): number {

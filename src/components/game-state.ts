@@ -4,6 +4,7 @@ import { BlockToPlace } from '../blocks/bases/block-to-place';
 import { BlockToPlaceLiquid, BlockToPlaceWater } from '../blocks/block-to-place-liquid';
 import { BlockToPlacePistonhead } from '../blocks/block-to-place-piston';
 import { blocksToPlaceItems } from '../helpers/blocks-to-place-items';
+import { noop } from '../helpers/noop';
 import { isBlock, isTurtleReachable } from '../helpers/reachability-helpers';
 import { Action, actionCosts, SimpleAction } from './action';
 import { dirCount } from './dir';
@@ -11,7 +12,9 @@ import { InventoryState } from './inventory/inventory';
 import { findPath } from './pathfinding';
 import { Reachability, ReachabilityState } from './reachability';
 import { TurtleState } from './turtle-state';
-import { addVectors, DOWN, subVectors, UP, Vector } from './vector';
+import { addVectors, DOWN, manhattanDistance, subVectors, UP, Vector } from './vector';
+
+const refuelHeuristicAbove = 24;
 
 export interface GameStateEnvironment {
   readonly supplyPointPosition: Vector;
@@ -24,16 +27,35 @@ export interface GameStateEnvironment {
   readonly blockDependencyMap: Map<BlockToPlace, BlockToPlace[]>;
 }
 
-export class GameState {
-  constructor(
-    public readonly env: GameStateEnvironment,
-    public readonly blocksToPlace: Map<string, BlockToPlace>,
-    public readonly turtle: TurtleState,
-    public readonly reachability: Reachability,
-    public readonly inventoryCredit: InventoryState,
-  ) {}
+export type SecondaryConstraintFailCallback = (
+  blockToPlace: BlockToPlace,
+  gameState: GameState,
+) => void;
 
-  getPossibleActions(): (SimpleAction | [SimpleAction, GameState])[] {
+export class GameState {
+  readonly blocksToPlaceHash: number;
+
+  constructor(
+    readonly env: GameStateEnvironment,
+    readonly blocksToPlace: Map<string, BlockToPlace>,
+    readonly turtle: TurtleState,
+    readonly reachability: Reachability,
+    readonly inventoryCredit: InventoryState,
+    blocksToPlaceHash?: number,
+  ) {
+    if (blocksToPlaceHash === undefined) {
+      blocksToPlaceHash = blocksToPlace.size;
+      for (const block of blocksToPlace.values()) {
+        blocksToPlaceHash += block.id;
+      }
+    }
+    this.blocksToPlaceHash = blocksToPlaceHash;
+  }
+
+  getPossibleActions(
+    isClosedTargetBlock: (block: BlockToPlace) => boolean,
+    onSecondaryConstraintFail: SecondaryConstraintFailCallback = noop,
+  ): (SimpleAction | [SimpleAction, GameState])[] {
     const { reachability, turtle, inventoryCredit } = this;
     if (inventoryCredit.addableItemsetRatio === 0) {
       return [];
@@ -53,15 +75,27 @@ export class GameState {
     if (isTurtleReachable(reachability.at(...forwardPosition))) {
       actions.push('forward');
     }
-    const gameStateAfterPlace = this.tryToPlaceBlock(forwardPosition);
+    const gameStateAfterPlace = this.tryToPlaceBlock(
+      forwardPosition,
+      isClosedTargetBlock,
+      onSecondaryConstraintFail,
+    );
     if (gameStateAfterPlace) {
       actions.push(['place', gameStateAfterPlace]);
     }
-    const gameStateAfterPlaceUp = this.tryToPlaceBlock(upPosition);
+    const gameStateAfterPlaceUp = this.tryToPlaceBlock(
+      upPosition,
+      isClosedTargetBlock,
+      onSecondaryConstraintFail,
+    );
     if (gameStateAfterPlaceUp) {
       actions.push(['placeUp', gameStateAfterPlaceUp]);
     }
-    const gameStateAfterPlaceDown = this.tryToPlaceBlock(downPosition);
+    const gameStateAfterPlaceDown = this.tryToPlaceBlock(
+      downPosition,
+      isClosedTargetBlock,
+      onSecondaryConstraintFail,
+    );
     if (gameStateAfterPlaceDown) {
       actions.push(['placeDown', gameStateAfterPlaceDown]);
     }
@@ -79,16 +113,39 @@ export class GameState {
   }
 
   getResupplyActions() {
+    const {
+      env: { supplyPointPosition, supplyPointDirection },
+      turtle: { position, direction },
+      reachability: { size, originDistance },
+    } = this;
+
     const actions = findPath(
-      this.turtle.position,
-      this.turtle.direction,
-      this.env.supplyPointPosition,
-      this.env.supplyPointDirection,
-      this.reachability.size,
-      this.reachability.originDistance,
+      position,
+      direction,
+      supplyPointPosition,
+      supplyPointDirection,
+      size,
+      originDistance,
     );
-    assert(actions, 'No path to supply point found');
+    if (!actions) {
+      throw new Error('No path to supply point found');
+    }
+
     return actions;
+  }
+
+  getResupplyCost() {
+    const distance = manhattanDistance(
+      this.turtle.position,
+      this.env.supplyPointPosition,
+    );
+
+    if (distance > refuelHeuristicAbove) {
+      return distance * actionCosts.resupply;
+    }
+
+    const actions = this.getResupplyActions();
+    return actions.reduce((sum, action) => sum + actionCosts[action], 0);
   }
 
   executeAction(
@@ -138,6 +195,7 @@ export class GameState {
         newTurtle,
         this.reachability,
         this.inventoryCredit,
+        this.blocksToPlaceHash,
       ),
       actionCosts[action],
     ];
@@ -158,11 +216,19 @@ export class GameState {
       const [x, y, z] = block;
 
       const index = x + y * width + z * width * height;
+      const originDistance = reachability.originDistance[index];
       if (
-        reachability.originDistance[index] === ReachabilityState.Blocked ||
+        originDistance === ReachabilityState.Blocked ||
         (block instanceof BlockToPlaceLiquid && !blocksToPlace.has(String(block)))
       ) {
         continue;
+      }
+
+      if (
+        originDistance === ReachabilityState.Unreachable //||
+        // !block.isConditionSatisfied(reachability, blocksToPlace) // TODO: find a better way, like placing in order
+      ) {
+        return false;
       }
 
       const reachabilityDirections = gateMap[index]!;
@@ -237,11 +303,17 @@ export class GameState {
     return true;
   }
 
-  private tryToPlaceBlock(position: Vector) {
+  private tryToPlaceBlock(
+    position: Vector,
+    isClosedTargetBlock: (block: BlockToPlace) => boolean,
+    onSecondaryConstraintFail: SecondaryConstraintFailCallback,
+  ) {
     const { reachability, blocksToPlace, turtle } = this;
     const blockToPlace = blocksToPlace.get(String(position));
     if (
-      !blockToPlace?.isPlaceable(reachability, turtle, blocksToPlace) ||
+      !blockToPlace ||
+      isClosedTargetBlock(blockToPlace) ||
+      !blockToPlace.isPlaceable(reachability, turtle, blocksToPlace) ||
       !this.inventoryCredit.canAddItems(blockToPlace.items)
     ) {
       return undefined;
@@ -255,10 +327,14 @@ export class GameState {
       return newGameState;
     }
 
+    if (this.isTurtleTrapped(newReachability)) {
+      return undefined;
+    }
+
     if (
-      this.isTurtleTrapped(newReachability) ||
       newBlocksToPlace.values().some((block) => !block.isReachable(newReachability))
     ) {
+      onSecondaryConstraintFail(blockToPlace, this);
       return undefined;
     }
 
@@ -278,6 +354,7 @@ export class GameState {
       dependants.length > 0 &&
       !this.canCompleteDependencyChain(newReachability, dependants, newBlocksToPlace)
     ) {
+      onSecondaryConstraintFail(blockToPlace, this);
       return undefined;
     }
 
@@ -346,11 +423,8 @@ export class GameState {
   private resupplyAction(): [gameState: GameState, cost: number] {
     const { supplyPointPosition, supplyPointDirection } = this.env;
 
-    const resupplyActions = this.getResupplyActions();
-    const costSum = resupplyActions.reduce(
-      (sum, action) => sum + actionCosts[action],
-      0,
-    );
+    const resupplyCost = this.getResupplyCost();
+
     const newTurtle = new TurtleState(supplyPointPosition, supplyPointDirection);
     return [
       new GameState(
@@ -359,8 +433,9 @@ export class GameState {
         newTurtle,
         this.reachability,
         this.inventoryCredit.clear(),
+        this.blocksToPlaceHash,
       ),
-      costSum * this.inventoryCredit.addableItemsetRatio,
+      resupplyCost, //* this.inventoryCredit.addableItemsetRatio,
     ];
   }
 }

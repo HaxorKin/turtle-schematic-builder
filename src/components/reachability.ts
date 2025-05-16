@@ -1,7 +1,22 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { PriorityQueue } from '@datastructures-js/priority-queue';
 import { BlockToPlace } from '../blocks/bases/block-to-place';
+import { setTryToAdd } from '../helpers/try-to-add';
 import { Dir } from './dir';
 import { Vector } from './vector';
+
+export type PathNode = number;
+// Node type for pathfinding
+type AStarNode = [
+  fScore: number,
+  cacheIndex: number,
+  x: number,
+  y: number,
+  z: number,
+  distance: number,
+  index: number,
+  parent?: AStarNode,
+];
 
 export const enum ReachabilityState {
   Blocked = -2,
@@ -64,47 +79,164 @@ export class Reachability {
       const neighborDistance = distance + 1;
       if (x + 1 < width) {
         const neighborIndex = index + 1;
-        if (!visitedPositions.has(neighborIndex)) {
+        if (setTryToAdd(visitedPositions, neighborIndex)) {
           queue.push([x + 1, y, z, neighborDistance, neighborIndex]);
-          visitedPositions.add(neighborIndex);
         }
       }
       if (x - 1 >= 0) {
         const neighborIndex = index - 1;
-        if (!visitedPositions.has(neighborIndex)) {
+        if (setTryToAdd(visitedPositions, neighborIndex)) {
           queue.push([x - 1, y, z, neighborDistance, neighborIndex]);
-          visitedPositions.add(neighborIndex);
         }
       }
       if (y + 1 < height) {
         const neighborIndex = index + width;
-        if (!visitedPositions.has(neighborIndex)) {
+        if (setTryToAdd(visitedPositions, neighborIndex)) {
           queue.push([x, y + 1, z, neighborDistance, neighborIndex]);
-          visitedPositions.add(neighborIndex);
         }
       }
       if (y - 1 >= 0) {
         const neighborIndex = index - width;
-        if (!visitedPositions.has(neighborIndex)) {
+        if (setTryToAdd(visitedPositions, neighborIndex)) {
           queue.push([x, y - 1, z, neighborDistance, neighborIndex]);
-          visitedPositions.add(neighborIndex);
         }
       }
       if (z + 1 < depth) {
         const neighborIndex = index + widthHeight;
-        if (!visitedPositions.has(neighborIndex)) {
+        if (setTryToAdd(visitedPositions, neighborIndex)) {
           queue.push([x, y, z + 1, neighborDistance, neighborIndex]);
-          visitedPositions.add(neighborIndex);
         }
       }
       if (z - 1 >= 0) {
         const neighborIndex = index - widthHeight;
-        if (!visitedPositions.has(neighborIndex)) {
+        if (setTryToAdd(visitedPositions, neighborIndex)) {
           queue.push([x, y, z - 1, neighborDistance, neighborIndex]);
-          visitedPositions.add(neighborIndex);
         }
       }
     }
+  }
+
+  /**
+   * PathNodes are in reverse order, from destination to source.
+   * @throws {Error} When destination is blocked or unreachable.
+   */
+  path(from: Vector, to: Vector, cache?: PathNode[]): PathNode[] {
+    const { originDistance } = this;
+    const [width, height, depth] = this.size;
+    const widthHeight = width * height;
+    const [fromX, fromY, fromZ] = from;
+    const [toX, toY, toZ] = to;
+
+    // Quick exit for identical source and destination
+    if (fromX === toX && fromY === toY && fromZ === toZ) {
+      return [];
+    }
+
+    const srcIndex = fromX + fromY * width + fromZ * widthHeight;
+
+    if (cache) {
+      const cacheIndex = cache.indexOf(srcIndex);
+      if (cacheIndex !== -1) {
+        return cache.slice(0, cacheIndex + 1);
+      }
+    }
+
+    const destIndex = toX + toY * width + toZ * widthHeight;
+
+    // Manhattan distance heuristic
+    const heuristic = (x: number, y: number, z: number): number => {
+      return Math.abs(x - toX) + Math.abs(y - toY) + Math.abs(z - toZ);
+    };
+
+    // Create priority queue with min-heap based on fScore
+    const queue = new PriorityQueue<AStarNode>((a, b) => a[0] - b[0] || b[1] - a[1]);
+
+    // Add starting node
+    queue.enqueue([
+      heuristic(fromX, fromY, fromZ),
+      -1,
+      fromX,
+      fromY,
+      fromZ,
+      0,
+      srcIndex,
+    ]);
+
+    const visitedPositions = new Set<number>();
+    visitedPositions.add(srcIndex);
+
+    let astarNode: AStarNode | null;
+    while ((astarNode = queue.dequeue())) {
+      const [, cacheIndex, x, y, z, distance, index] = astarNode;
+
+      // Check if we've reached the destination
+      if (index === destIndex) {
+        const parentNode = astarNode[7];
+        return this.getPathNodes(parentNode);
+      }
+
+      // Check if we reached a cached position
+      if (cacheIndex !== -1) {
+        const parentNode = astarNode[7];
+        return this.getPathNodes(parentNode, cache!.slice(0, cacheIndex + 1));
+      }
+
+      const neighborDistance = distance + 1;
+
+      // Check all six directions
+      const currentNode = astarNode;
+      const checkNeighbor = (x: number, y: number, z: number, index: number) => {
+        let cacheIndex: number | undefined;
+
+        if (index !== destIndex) {
+          // Skip blocked positions
+          if (originDistance[index] === ReachabilityState.Blocked) {
+            return;
+          }
+
+          if (!setTryToAdd(visitedPositions, index)) {
+            return;
+          }
+
+          cacheIndex = cache?.indexOf(index);
+        }
+
+        // Calculate f-score (g + h) and add to queue
+        const fScore = neighborDistance + heuristic(x, y, z);
+        queue.enqueue([
+          fScore,
+          cacheIndex ?? -1,
+          x,
+          y,
+          z,
+          neighborDistance,
+          index,
+          currentNode,
+        ]);
+      };
+
+      if (x + 1 < width) {
+        checkNeighbor(x + 1, y, z, index + 1);
+      }
+      if (x - 1 >= 0) {
+        checkNeighbor(x - 1, y, z, index - 1);
+      }
+      if (y + 1 < height) {
+        checkNeighbor(x, y + 1, z, index + width);
+      }
+      if (y - 1 >= 0) {
+        checkNeighbor(x, y - 1, z, index - width);
+      }
+      if (z + 1 < depth) {
+        checkNeighbor(x, y, z + 1, index + widthHeight);
+      }
+      if (z - 1 >= 0) {
+        checkNeighbor(x, y, z - 1, index - widthHeight);
+      }
+    }
+
+    // If we exhaust the queue without finding the destination, it's unreachable
+    throw new Error('Destination is unreachable');
   }
 
   block(
@@ -250,7 +382,22 @@ export class Reachability {
     return this.gateMap[x + y * width + z * width * height]!;
   }
 
+  private getPathNodes(
+    astarNode: AStarNode | undefined,
+    pathNodes: PathNode[] = [],
+  ): PathNode[] {
+    let currentNode: AStarNode | undefined = astarNode;
+    while (currentNode) {
+      const index = currentNode[6];
+      pathNodes.push(index);
+      currentNode = currentNode[7];
+    }
+    // Not reversed, for efficiency
+    return pathNodes;
+  }
+
   private isDistanceInvalid(
+    index: number,
     x: number,
     y: number,
     z: number,
@@ -262,7 +409,6 @@ export class Reachability {
     const { originDistance } = this;
     const [width, height, depth] = this.size;
     const widthHeight = width * height;
-    const index = x + y * width + z * widthHeight;
     const gates = this.gateMap[index]!;
     const sourceDistance = distance - 1;
 
@@ -408,89 +554,67 @@ export class Reachability {
     const { originDistance } = this;
     const [width, height, depth] = this.size;
     const widthHeight = width * height;
+    const [x, y, z] = changedPoint;
+    const index = x + y * width + z * widthHeight;
 
     const dirtyPositions = new Map<number, Vector>();
+    dirtyPositions.set(index, [x, y, z]);
 
-    const recalculatePositions: [...changedPoint: Vector, originalDistance: number][] =
-      [[...changedPoint, originalDistance]];
+    const recalculatePositions: [
+      index: number,
+      ...changedPoint: Vector,
+      originalDistance: number,
+    ][] = [[index, ...changedPoint, originalDistance]];
 
-    let nextRecalculate: [number, number, number, number] | undefined;
+    const checkPoint = (
+      index: number,
+      x: number,
+      y: number,
+      z: number,
+      dependantDistance: number,
+    ) => {
+      const distance = originDistance[index];
+      if (
+        distance === dependantDistance &&
+        !dirtyPositions.has(index) &&
+        this.isDistanceInvalid(index, x, y, z, distance, dirtyPositions)
+      ) {
+        recalculatePositions.push([index, x, y, z, dependantDistance]);
+        dirtyPositions.set(index, [x, y, z]);
+      }
+    };
+
+    let nextRecalculate: [number, number, number, number, number] | undefined;
     while ((nextRecalculate = recalculatePositions.shift())) {
-      const [x, y, z, originalDistance] = nextRecalculate;
-      const index = x + y * width + z * widthHeight;
+      const [index, x, y, z, originalDistance] = nextRecalculate;
       const dependantDistance = originalDistance + 1;
-      dirtyPositions.set(index, [x, y, z]);
 
       if (x + 1 < width) {
-        const neighborIndex = index + 1;
-        const neighborDistance = originDistance[neighborIndex];
-        if (
-          neighborDistance === dependantDistance &&
-          this.isDistanceInvalid(x + 1, y, z, neighborDistance, dirtyPositions)
-        ) {
-          recalculatePositions.push([x + 1, y, z, neighborDistance]);
-        }
+        checkPoint(index + 1, x + 1, y, z, dependantDistance);
       }
-
       if (x - 1 >= 0) {
-        const neighborIndex = index - 1;
-        const neighborDistance = originDistance[neighborIndex];
-        if (
-          neighborDistance === dependantDistance &&
-          this.isDistanceInvalid(x - 1, y, z, neighborDistance, dirtyPositions)
-        ) {
-          recalculatePositions.push([x - 1, y, z, neighborDistance]);
-        }
+        checkPoint(index - 1, x - 1, y, z, dependantDistance);
       }
-
       if (y + 1 < height) {
-        const neighborIndex = index + width;
-        const neighborDistance = originDistance[neighborIndex];
-        if (
-          neighborDistance === dependantDistance &&
-          this.isDistanceInvalid(x, y + 1, z, neighborDistance, dirtyPositions)
-        ) {
-          recalculatePositions.push([x, y + 1, z, neighborDistance]);
-        }
+        checkPoint(index + width, x, y + 1, z, dependantDistance);
       }
-
       if (y - 1 >= 0) {
-        const neighborIndex = index - width;
-        const neighborDistance = originDistance[neighborIndex];
-        if (
-          neighborDistance === dependantDistance &&
-          this.isDistanceInvalid(x, y - 1, z, neighborDistance, dirtyPositions)
-        ) {
-          recalculatePositions.push([x, y - 1, z, neighborDistance]);
-        }
+        checkPoint(index - width, x, y - 1, z, dependantDistance);
       }
-
       if (z + 1 < depth) {
-        const neighborIndex = index + widthHeight;
-        const neighborDistance = originDistance[neighborIndex];
-        if (
-          neighborDistance === dependantDistance &&
-          this.isDistanceInvalid(x, y, z + 1, neighborDistance, dirtyPositions)
-        ) {
-          recalculatePositions.push([x, y, z + 1, neighborDistance]);
-        }
+        checkPoint(index + widthHeight, x, y, z + 1, dependantDistance);
       }
-
       if (z - 1 >= 0) {
-        const neighborIndex = index - widthHeight;
-        const neighborDistance = originDistance[neighborIndex];
-        if (
-          neighborDistance === dependantDistance &&
-          this.isDistanceInvalid(x, y, z - 1, neighborDistance, dirtyPositions)
-        ) {
-          recalculatePositions.push([x, y, z - 1, neighborDistance]);
-        }
+        checkPoint(index - widthHeight, x, y, z - 1, dependantDistance);
       }
     }
 
-    const [x, y, z] = changedPoint;
-    const index = x + y * width + z * widthHeight;
     if (originDistance[index] === ReachabilityState.Blocked) {
+      if (dirtyPositions.size === 1) {
+        // Nothing else changed
+        return;
+      }
+
       dirtyPositions.delete(index);
     }
 
@@ -695,8 +819,7 @@ export class Reachability {
       }
     }
 
-    // The remaining dirtyPositions are unreachable
-    for (const [index] of dirtyPositions) {
+    for (const index of dirtyPositions.keys()) {
       originDistance[index] = ReachabilityState.Unreachable;
     }
   }

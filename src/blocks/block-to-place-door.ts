@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { vectorToSingleDir } from '../components/dir';
+import { Dir, vectorToSingleDir } from '../components/dir';
 import { InventoryItem } from '../components/inventory/inventory-item';
 import { PaletteBlock } from '../components/nbt.validator';
 import { Reachability } from '../components/reachability';
@@ -30,13 +30,13 @@ export class BlockToPlaceDoor extends bottomSupportedMixin(BlockToPlaceBase) {
   ) {
     super(id, pos, items);
 
-    this.dependencyDirections = vectorToSingleDir(invertVector(facing));
+    this.dependencyDirections = Dir.Down | vectorToSingleDir(invertVector(facing));
     this.extraBlocks = [new BlockToPlaceDoorUpper(id, addVectors(pos, UP), [], facing)];
   }
 
   reachabilityDirections(reachability: Reachability): number {
     return isTurtleReachable(reachability.at(...subVectors(this, this.facing)))
-      ? this.dependencyDirections
+      ? vectorToSingleDir(invertVector(this.facing))
       : 0;
   }
 }

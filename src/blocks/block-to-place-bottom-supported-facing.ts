@@ -47,7 +47,8 @@ export class BlockToPlaceBottomSupportedFacing extends bottomSupportedMixin(
     }
 
     this.facing = facingVector;
-    this.dependencyDirections = Dir.Up | mirrorDir(vectorToSingleDir(this.facing));
+    this.dependencyDirections =
+      Dir.Up | Dir.Down | mirrorDir(vectorToSingleDir(this.facing));
   }
 
   override isPlaceable(reachability: Reachability, turtle: TurtleState): boolean {

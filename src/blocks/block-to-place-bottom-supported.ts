@@ -12,7 +12,7 @@ export class BlockToPlaceBottomSupported extends bottomSupportedMixin(
   BlockToPlaceBase,
 ) {
   get dependencyDirections() {
-    return Dir.Up | Dir.East | Dir.West | Dir.South | Dir.North;
+    return Dir.All;
   }
 
   reachabilityDirections(reachability: Reachability): number {

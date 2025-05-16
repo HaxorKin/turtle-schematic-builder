@@ -11,6 +11,7 @@ import { TurtleState } from '../../components/turtle-state';
 import { EAST, NORTH, NULL_VECTOR, SOUTH, Vector, WEST } from '../../components/vector';
 import { createBlocksToPlace } from '../../create-blocks-to-place';
 import { createBlockDependencyMap } from '../create-block-dependency-map';
+import { noop } from '../noop';
 import { isBlock } from '../reachability-helpers';
 import { airNbt } from './mock-nbts';
 import { graphemes } from './text';
@@ -127,7 +128,7 @@ export function placementTest({
     inventory,
   );
 
-  const possibleActions = gameState.getPossibleActions();
+  const possibleActions = gameState.getPossibleActions(() => false, noop);
   const possibleActionNames = possibleActions.map((action) =>
     typeof action === 'string' ? action : action[0],
   );

@@ -10,6 +10,7 @@ export type BlockToPlace = Vector & {
 
   /**
    * Directions, where placed blocks can affect reachabilityCount,
+   * including the condition's direction if applicable,
    * undefined if the block can be placed from any direction
    */
   readonly dependencyDirections: number | undefined;
@@ -27,11 +28,6 @@ export type BlockToPlace = Vector & {
 
   /** Directions the block can be placed from, undefined if it's any direction */
   reachabilityDirections(
-    reachability: Reachability,
-    blocksToPlace: Map<string, BlockToPlace> | undefined,
-  ): number | undefined;
-  /** Number of directions the block can be placed from, undefined if it's any direction */
-  reachabilityCount(
     reachability: Reachability,
     blocksToPlace: Map<string, BlockToPlace> | undefined,
   ): number | undefined;

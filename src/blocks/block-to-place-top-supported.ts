@@ -10,7 +10,7 @@ import { topSupportedMixin } from './mixins/block-to-place-top-supported.mixin';
 // - And there is a block above the target block
 export class BlockToPlaceTopSupported extends topSupportedMixin(BlockToPlaceBase) {
   get dependencyDirections() {
-    return Dir.Down | Dir.East | Dir.West | Dir.South | Dir.North;
+    return Dir.All;
   }
 
   reachabilityDirections(reachability: Reachability): number {

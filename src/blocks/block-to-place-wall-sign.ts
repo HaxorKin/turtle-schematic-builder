@@ -41,9 +41,9 @@ export class BlockToPlaceWallSign extends BlockToPlaceWallAttachedBase {
 
     // Wall sign facing directions are inverted
     this.facing = invertVector(facingMapping[facing]);
+    const facingDir = vectorToSingleDir(this.facing);
 
-    this.dependencyDirections =
-      Dir.Up | Dir.Down | mirrorDir(vectorToSingleDir(this.facing));
+    this.dependencyDirections = Dir.Up | Dir.Down | facingDir | mirrorDir(facingDir);
   }
 
   reachabilityDirections(

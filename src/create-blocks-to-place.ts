@@ -203,26 +203,22 @@ const waterlogWaterPaletteBlock: PaletteBlock = {
 
 interface ProcessBlockParams {
   schematic: Schematic;
-  reachability: Reachability;
   x: number;
   y: number;
   z: number;
   blockIdCounter: number;
   allBlocksToPlace: Map<string, BlockToPlace>;
-  gateMap: Uint8Array;
   dataDrivenBlocks: Map<string, DataDrivenBlock>;
   getPositionOverride: GetPositionOverrideFn;
 }
 
 function processBlock({
   schematic,
-  reachability,
   x,
   y,
   z,
   blockIdCounter,
   allBlocksToPlace,
-  gateMap,
   dataDrivenBlocks,
   getPositionOverride,
 }: ProcessBlockParams): boolean {
@@ -239,19 +235,8 @@ function processBlock({
   });
 
   if (blockToPlace) {
-    const [width, height] = schematic.size;
-
     for (const block of [blockToPlace, ...(blockToPlace.extraBlocks ?? [])]) {
       allBlocksToPlace.set(String(block), block);
-
-      const gates = block.reachabilityDirections(reachability, allBlocksToPlace);
-      if (gates !== undefined) {
-        if (gates === 0) {
-          throw new Error(`Block ${block} cannot be reached`);
-        }
-        const [x, y, z] = block;
-        gateMap[x + y * width + z * width * height] = gates;
-      }
     }
 
     if (isWaterlogged(paletteBlock)) {
@@ -283,6 +268,29 @@ function processBlock({
   return false;
 }
 
+function setGates(
+  reachability: Reachability,
+  gateMap: Uint8Array,
+  allBlocksToPlace: Map<string, BlockToPlace>,
+) {
+  const [width, height] = reachability.size;
+  const widthHeight = width * height;
+
+  for (const [key, block] of allBlocksToPlace) {
+    if (key.endsWith('w')) {
+      continue;
+    }
+    const gates = block.reachabilityDirections(reachability, allBlocksToPlace);
+    if (gates !== undefined) {
+      if (gates === 0) {
+        throw new Error(`Block ${block} cannot be reached`);
+      }
+      const [x, y, z] = block;
+      gateMap[x + y * width + z * widthHeight] = gates;
+    }
+  }
+}
+
 export function createBlocksToPlace(
   schematic: Schematic,
   dataDrivenBlocks = defaultDataDrivenBlocks,
@@ -294,7 +302,7 @@ export function createBlocksToPlace(
     schematicWidth * schematicHeight * schematicDepth,
   ).fill(Dir.All);
 
-  reachability ??= new Reachability(schematic.size, [0, 0, 0], gateMap.slice());
+  reachability ??= new Reachability(schematic.size, [0, 0, 0], gateMap);
 
   let blockIdCounter = 0;
   const allBlocksToPlace = new Map<string, BlockToPlace>();
@@ -314,13 +322,11 @@ export function createBlocksToPlace(
         if (
           processBlock({
             schematic,
-            reachability,
             x,
             y,
             z,
             blockIdCounter,
             allBlocksToPlace,
-            gateMap,
             dataDrivenBlocks,
             getPositionOverride,
           })
@@ -337,5 +343,6 @@ export function createBlocksToPlace(
     );
   }
 
+  setGates(reachability, gateMap, allBlocksToPlace);
   return [allBlocksToPlace, gateMap];
 }

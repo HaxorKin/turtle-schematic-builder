@@ -52,19 +52,6 @@ export abstract class BlockToPlaceBase
     return true;
   }
 
-  reachabilityCount(
-    reachability: Reachability,
-    blocksToPlace?: Map<string, BlockToPlace>,
-  ) {
-    const reachabilityDirections = this.reachabilityDirections(
-      reachability,
-      blocksToPlace,
-    );
-    if (reachabilityDirections === undefined) return undefined;
-
-    return dirCount(reachabilityDirections);
-  }
-
   isDeadlockable(reachabilityDirections: number): boolean {
     return dirCount(reachabilityDirections) <= 1;
   }

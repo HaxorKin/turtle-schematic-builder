@@ -33,7 +33,7 @@ export function blockToPlaceHopperFactory(
 
 export class BlockToPlaceHopperDown extends BlockToPlaceBase {
   get dependencyDirections() {
-    return Dir.Up | Dir.Down | Dir.East | Dir.West | Dir.South | Dir.North;
+    return Dir.All;
   }
 
   reachabilityDirections(

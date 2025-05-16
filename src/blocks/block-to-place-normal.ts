@@ -12,18 +12,11 @@ export class BlockToPlaceNormal extends BlockToPlaceBase {
     return isTurtleReachable(reachability.at(this[0], this[1], this[2]));
   }
 
-  override isConditionSatisfied() {
-    return true;
-  }
-
   override isPlaceable() {
     return true;
   }
 
   reachabilityDirections() {
-    return undefined;
-  }
-  override reachabilityCount() {
     return undefined;
   }
 }

@@ -1,5 +1,15 @@
 {
   "jest.nodeEnv": {
     "NODE_OPTIONS": "--experimental-vm-modules"
-  }
+  },
+  "Lua.workspace.library": ["node_modules/lua-ls-cc-tweaked"],
+  "Lua.workspace.checkThirdParty": true,
+  "Lua.diagnostics.globals": ["turtle", "term", "sleep", "peripheral"],
+  "stylua.targetReleaseVersion": "latest",
+  "Lua.format.enable": false,
+  "Lua.typeFormat.config": {
+    "format_line": "false"
+  },
+  "Lua.runtime.version": "Lua 5.3",
+  "Lua.doc.protectedName": ["_*"]
 }
